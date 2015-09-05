@@ -1,0 +1,3 @@
+{
+    "lastCheck" : "2015-09-03 21:23:20", "DATENOTE" : "Format in ISO (YYYY-MM-DD), time is 24h", "feeds" : ["http://www.npr.org/templates/rss/podlayer.php?id=1019", "http://www.evilmadscientist.com/feed/", "http://snarlbear.com/rss.php"];
+}
