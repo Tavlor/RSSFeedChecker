@@ -16,130 +16,100 @@
 
 import feedparser, time, json
 from datetime import datetime
+from os import path
 
 def main():
-	'''#*** SETUP ****************************************************************
-	print(" -- STARTING")
-	#load the previous timestamps & hyperlinks.
-	feedStorePath = r"G:/Python/Code/feeds.txt"
-	with open(feedStorePath, 'r') as feedStore:
-		feedJSON = json.load(feedStore)
-	#configure the format which time is loaded/saved in.
-	#CAUTION! Changing this might cause issues with parsing the time.
-	datetimeFormat = "%Y-%m-%d %H:%M:%S"
-	startCheckTime = datetime.now()
-	#FIXME: this loads as string; convert it to time or datetime
-	lastCheck = datetime.strptime(feedJSON["lastCheck"], datetimeFormat)
-	#for absolute time, use datetime(2015,9,1,0,0)
-	linkList = feedJSON["feeds"]
-	feedList = []
-	grandCounter = 0
-	grandSummary =	"=-= SUMMARY =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-	grandText =		"=-= RESULTS =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-	decorative =	"=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n"
-	#this will be sent out via text/email. Build up of all output.
-	message = ""
-	
-	#*** MAIN CODE ************************************************************
-	print("Last checked at " + str(lastCheck) + ",\nnow checking at " \
-		+ str(startCheckTime))
-	#parse all the links into feed objects.
-	for link in linkList:
-		feedList.append(feedparser.parse(link))
-
-	#loop through each feed, building a list of new entries
-	for feed in feedList:
-		feedResult = checkFeed(feed, lastCheck)
-		grandCounter = grandCounter + feedResult[0]
-		#if there were new items detected, add to grandText.
-		if feedResult[0] > 0:
-			grandText = grandText + feedResult[1] + decorative 
-		grandSummary = grandSummary + feedResult[2]
-
-	#build the message.
-	message = "There are " + str(grandCounter) + \
-		" new entries in all your feeds.\n" + grandSummary + grandText
-	print(" __ Printing results...")
-	print(message)
-	
-	#save the new check time in the JSON structure, then save the JSON.
-	feedJSON["lastCheck"] = datetime.strftime(startCheckTime, datetimeFormat)
-	with open(feedStorePath, 'w') as feedStore:
-		json.dump(feedJSON,feedStore)
-	#wait for the user to press enter
-	input()'''
-	print(checkFeedsInList())
+	result = checkFeedsInList()
+	print(result[0] + result[1] + result[2])
 #*** END OF MAIN **************************************************************
 
 def checkFeedsInList():
 	#*** SETUP ****************************************************************
 	#load the previous timestamps & hyperlinks.
-	feedStorePath = r"G:/Python/Code/feeds.txt"
+	feedStorePath = path.dirname(__file__) + "\\feeds.txt"
 	with open(feedStorePath, 'r') as feedStore:
 		feedJSON = json.load(feedStore)
+
 	#configure the format which time is loaded/saved in.
 	#CAUTION! Changing this might cause issues with parsing the time.
 	datetimeFormat = "%Y-%m-%d %H:%M:%S"
-	startCheckTime = datetime.now()
-	#FIXME: this loads as string; convert it to time or datetime
+	
+	startlastDatetime = datetime.now()
 	lastCheck = datetime.strptime(feedJSON["lastCheck"], datetimeFormat)
 	#for absolute time, use datetime(2015,9,1,0,0)
-	linkList = feedJSON["feeds"]
-	feedList = []
-	grandCounter = 0
-	grandSummary =	"=-= SUMMARY =-=-=-=\n"
-	grandText =		"=-= RESULTS =-=-=-=\n"
+	
+	#linkList = feedJSON["feeds"]
+	feedDataList = []
+	
+	totalTally = 0
+	#text to be returned.
+	heading = "" #contains totalTally
+	fullSummary =	"=-= SUMMARY =-=-=-=\n" #contains individual summaries
+	results =		"=-= RESULTS =-=-=-=\n" #contains all the new entry names
 	decorative =	"=-=-=-=-=-=-=-=-=-=\n"
-	#this will be sent out via text/email. Build up of all output.
-	message = ""
 	
 	#*** MAIN CODE ************************************************************
 	print("Last checked at " + str(lastCheck) + ",\nnow checking at " \
-		+ str(startCheckTime))
-	#parse all the links into feed objects.
-	for link in linkList:
-		feedList.append(feedparser.parse(link))
+		+ str(startlastDatetime))
+
+	#parse all the links into feed objects & place in a dictionary
+	for data in feedJSON["feeds"]:#linkList:
+		feedDataList.append({"feed":feedparser.parse(data["URL"]), \
+		"latestDatetime":datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
 
 	#loop through each feed, building a list of new entries
-	for feed in feedList:
-		feedResult = checkFeed(feed, lastCheck)
-		grandCounter = grandCounter + feedResult[0]
-		#if there were new items detected, add to grandText.
-		if feedResult[0] > 0:
-			grandText = grandText + feedResult[1] + decorative 
-		grandSummary = grandSummary + feedResult[2]
+	for index, pair in enumerate(feedDataList):
+		feedResult = checkFeed(pair["feed"], pair["latestDatetime"])
+		#update totalTally
+		totalTally = totalTally + feedResult[0]
 
-	#build the message.
-	message = "There are " + str(grandCounter) + \
-		" new entries in all your feeds.\n" + grandSummary + grandText
-	
+		#if there were new items detected, add to results.
+		if feedResult[0] > 0:
+			results = results + feedResult[1] + decorative
+
+		#add the summary piece to fullSummary
+		fullSummary = fullSummary + feedResult[2]
+
+		#store the PublishDate of the latest entry so we have it next time
+		feedJSON["feeds"][index]["latestTimeStamp"] = \
+		datetime.strftime(feedResult[3], datetimeFormat)
+
+	heading = "There are " + str(totalTally) + \
+		" new entries in all your feeds.\n"
+
 	#save the new check time in the JSON structure, then save the JSON.
-	feedJSON["lastCheck"] = datetime.strftime(startCheckTime, datetimeFormat)
+	feedJSON["lastCheck"] = datetime.strftime(startlastDatetime, datetimeFormat)
 	with open(feedStorePath, 'w') as feedStore:
 		json.dump(feedJSON,feedStore)
-	return(message)
+		
+	return (heading, fullSummary, results)
 #*** END OF checkFeedsInList() *************************************************
 	
-def checkFeed(feed, checkTime):
-	#requires a feed object and the date to compare, returns a tuple containing
+def checkFeed(feed, lastDatetime):
+	#requires a feed object and a datetime to compare, returns a tuple containing
 	#the number of new elements, a string of text representing those elements
 	#and a summary string.
 
+	#get the most recent timestamp, will be returned.
+	latestTimeStamp = \
+	datetime.fromtimestamp(time.mktime(feed.entries[0].updated_parsed))
+	
 	#keep track of the number of new entries
 	counter = 0
+	
 	#holds the text output of this function.
 	feedSummary = ""
 	feedText = feed.feed.title + "\n"
 	
 	#print(decorative)
 	print(" __ Checking " + feed.feed.title)
-	#print(datetime.datetime.fromtimestamp(mktime(snarlFeed.entries[0].updated_parsed)))
 	
 	#Go through entries until you hit an old one.
 	for entry in feed.entries:
-		feedTime = datetime.fromtimestamp(time.mktime(entry.updated_parsed))
+		#feedparser parses time as 'time_struct', we need datetime
+		feedDatetime = datetime.fromtimestamp(time.mktime(entry.updated_parsed))
 		#Check to see if entry is new.
-		if checkTime <= feedTime:
+		if feedDatetime > lastDatetime:
 			feedText = feedText + " + " + entry.title + "\n"
 			counter = counter + 1
 		else:
@@ -153,9 +123,12 @@ def checkFeed(feed, checkTime):
 	else:
 		feedSummary = "There are " + str(counter) + " new entries in " + \
 		feed.feed.title + ".\n"
+
 	feedText = feedText
-	return (counter, feedText, feedSummary)
-#*** END OF checkFeed() *********************************************************
+	
+	#return count, the text, and the most recent timestamp in a tuple
+	return (counter, feedText, feedSummary, latestTimeStamp)
+#*** END OF checkFeed() *******************************************************
 	
 #this allows the program to run on it's own. If the file is imported, then 
 #__name__ will equal the module's name.

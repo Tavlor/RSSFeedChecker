@@ -1,24 +1,31 @@
+
 {
-	"lastCheck" : "2015-09-03 21:23:20",
 	"DATENOTE" : "Format in ISO (YYYY-MM-DD), time is 24h",
-	"feeds" : [{
+	"lastCheck" : "2015-09-05 20:24:44",
+	"feeds" : [
+		{
 			"URL" : "http://www.npr.org/templates/rss/podlayer.php?id=1019",
-			"lastPublishDate" : "1997-01-01 00:00:00"
-		}, {
+			"latestTimeStamp" : "2015-09-03 22:30:00"
+		},
+		{
 			"URL" : "http://www.evilmadscientist.com/feed/",
-			"lastPublishDate" : "1997-01-01 00:00:00"
-		}, {
+			"latestTimeStamp" : "2015-09-03 23:52:29"
+		},
+		{
 			"URL" : "http://snarlbear.com/rss.php",
-			"lastPublishDate" : "1997-01-01 00:00:00"
-		}, {
+			"latestTimeStamp" : "2015-09-03 05:00:00"
+		},
+		{
 			"URL" : "http://genlevcreative.thewebcomic.com/rss/",
-			"lastPublishDate" : "1997-01-01 00:00:00"
-		}, {
+			"latestTimeStamp" : "2015-08-25 05:01:58"
+		},
+		{
 			"URL" : "http://turnerandhercules.thecomicseries.com/rss/",
-			"lastPublishDate" : "1997-01-01 00:00:00"
-		}, {
+			"latestTimeStamp" : "2015-05-27 20:36:37"
+		},
+		{
 			"URL" : "http://feeds.feedburner.com/mclelun",
-			"lastPublishDate" : "1997-01-01 00:00:00"
+			"latestTimeStamp" : "2015-09-05 07:14:48"
 		}
 	]
 }
