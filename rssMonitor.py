@@ -25,32 +25,29 @@ def main():
 
 def checkFeedsInList():
 	#*** SETUP ****************************************************************
-	#load the previous timestamps & hyperlinks.
-	feedStorePath = path.dirname(__file__) + "\\feeds.txt"
-	with open(feedStorePath, 'r') as feedStore:
-		feedJSON = json.load(feedStore)
-
 	#configure the format which time is loaded/saved in.
 	#CAUTION! Changing this might cause issues with parsing the time.
 	datetimeFormat = "%Y-%m-%d %H:%M:%S"
 	
-	startlastDatetime = datetime.now()
-	lastCheck = datetime.strptime(feedJSON["lastCheck"], datetimeFormat)
-	#for absolute time, use datetime(2015,9,1,0,0)
-	
-	#linkList = feedJSON["feeds"]
+	feedStorePath = path.dirname(__file__) + "\\feeds.txt"
+	startDatetime = datetime.now()
 	feedDataList = []
-	
 	totalTally = 0
 	#text to be returned.
 	heading = "" #contains totalTally
 	fullSummary =	"=-= SUMMARY =-=-=-=\n" #contains individual summaries
 	results =		"=-= RESULTS =-=-=-=\n" #contains all the new entry names
 	decorative =	"=-=-=-=-=-=-=-=-=-=\n"
+
+	#open the JSON file
+	with open(feedStorePath, 'r') as feedStore:
+		feedJSON = json.load(feedStore)
+
+	lastCheck = datetime.strptime(feedJSON["lastCheck"], datetimeFormat)
 	
 	#*** MAIN CODE ************************************************************
 	print("Last checked at " + str(lastCheck) + ",\nnow checking at " \
-		+ str(startlastDatetime))
+		+ str(startDatetime))
 
 	#parse all the links into feed objects & place in a dictionary
 	for data in feedJSON["feeds"]:#linkList:
@@ -78,12 +75,12 @@ def checkFeedsInList():
 		" new entries in all your feeds.\n"
 
 	#save the new check time in the JSON structure, then save the JSON.
-	feedJSON["lastCheck"] = datetime.strftime(startlastDatetime, datetimeFormat)
+	feedJSON["lastCheck"] = datetime.strftime(startDatetime, datetimeFormat)
 	with open(feedStorePath, 'w') as feedStore:
 		json.dump(feedJSON,feedStore)
 		
 	return (heading, fullSummary, results)
-#*** END OF checkFeedsInList() *************************************************
+#*** END OF checkFeedsInList() ************************************************
 	
 def checkFeed(feed, lastDatetime):
 	#requires a feed object and a datetime to compare, returns a tuple containing
