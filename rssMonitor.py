@@ -11,7 +11,7 @@
 	TODO: allow user to request just a summary or the entire thing.
 	TODO: colored text output: use CURSES?
 	TODO: does this take timezones into account?
-	TODO: add error safety around the JSON file. Be sure to add keys that don't exist
+	TODO: add error safety around the JSON file in loadFeeds().
 '''
 
 import feedparser, time, json
@@ -27,9 +27,23 @@ def getFeedListString():
 	pass
 #*** END OF getFeedListString() ***********************************************
 
-def loadFeed():
-	pass
-#*** END OF loadFeed() ********************************************************
+def loadFeeds(path, datetimeFormat):
+	#TODO: add error safety; automagically add keys that don't exist
+	
+	newfeeds = []
+	#open the txt file and parse it as json
+	with open(path, 'r') as feedStore:
+		newjson = json.load(feedStore)
+	
+	#parse the urls in the json structure as feeds
+	for data in newjson["feeds"]:#linkList:
+		#construct array of parsed feeds
+		newfeeds.append({"feed":feedparser.parse(data["URL"]), \
+		"latestDatetime":datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
+	
+	#return a tuple of the json structure and the feed list
+	return(newjson, newfeeds)
+#*** END OF loadFeeds() *******************************************************
 	
 def checkFeedsInList():
 	#*** SETUP ****************************************************************
@@ -48,8 +62,9 @@ def checkFeedsInList():
 	decorative =	"=-=-=-=-=-=-=-=-=-=\n"
 
 	#open the JSON file
-	with open(feedStorePath, 'r') as feedStore:
-		feedJSON = json.load(feedStore)
+	'''with open(feedStorePath, 'r') as feedStore:
+		feedJSON = json.load(feedStore)'''
+	feedJSON, feedDataList = loadFeeds(feedStorePath, datetimeFormat)
 
 	lastCheck = datetime.strptime(feedJSON["lastCheck"], datetimeFormat)
 	
@@ -58,10 +73,11 @@ def checkFeedsInList():
 		+ str(startDatetime))
 
 	#parse all the links into feed objects & place in a dictionary
-	for data in feedJSON["feeds"]:#linkList:
+	'''for data in feedJSON["feeds"]:#linkList:
 		#construct array of parsed feeds
 		feedDataList.append({"feed":feedparser.parse(data["URL"]), \
 		"latestDatetime":datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
+		'''
 
 	#loop through each feed, building a list of new entries
 	for index, pair in enumerate(feedDataList):
