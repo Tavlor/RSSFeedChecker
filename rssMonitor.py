@@ -11,7 +11,7 @@
 	TODO: allow user to request just a summary or the entire thing.
 	TODO: colored text output: use CURSES?
 	TODO: does this take timezones into account?
-	TODO: add error safety around the JSON file.
+	TODO: add error safety around the JSON file. Be sure to add keys that don't exist
 '''
 
 import feedparser, time, json
@@ -23,6 +23,14 @@ def main():
 	print(result[0] + result[1] + result[2])
 #*** END OF MAIN **************************************************************
 
+def getFeedListString():
+	pass
+#*** END OF getFeedListString() ***********************************************
+
+def loadFeed():
+	pass
+#*** END OF loadFeed() ********************************************************
+	
 def checkFeedsInList():
 	#*** SETUP ****************************************************************
 	#configure the format which time is loaded/saved in.
@@ -51,6 +59,7 @@ def checkFeedsInList():
 
 	#parse all the links into feed objects & place in a dictionary
 	for data in feedJSON["feeds"]:#linkList:
+		#construct array of parsed feeds
 		feedDataList.append({"feed":feedparser.parse(data["URL"]), \
 		"latestDatetime":datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
 
@@ -70,6 +79,8 @@ def checkFeedsInList():
 		#store the PublishDate of the latest entry so we have it next time
 		feedJSON["feeds"][index]["latestTimeStamp"] = \
 		datetime.strftime(feedResult[3], datetimeFormat)
+		#store the feed name as well.
+		feedJSON["feeds"][index]["title"] = pair["feed"].feed.title
 
 	heading = "There are " + str(totalTally) + \
 		" new entries in all your feeds.\n"
@@ -114,7 +125,8 @@ def checkFeed(feed, lastDatetime):
 
 	#somewhat intelligent output. Stupid, but clever enough.
 	if counter == 0:
-		feedSummary = "There are no new entries in " + feed.feed.title + ".\n"
+		#don't return anything if nothing is new
+		pass
 	elif counter == 1:
 		feedSummary = "There is 1 new entry in " + feed.feed.title + ".\n" 
 	else:
@@ -123,7 +135,7 @@ def checkFeed(feed, lastDatetime):
 
 	feedText = feedText
 	
-	#return count, the text, and the most recent timestamp in a tuple
+	#return count, the two strings, and the most recent timestamp in a tuple
 	return (counter, feedText, feedSummary, latestTimeStamp)
 #*** END OF checkFeed() *******************************************************
 	
