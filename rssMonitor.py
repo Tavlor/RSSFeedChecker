@@ -10,6 +10,8 @@
 	TODO: colored text output: use CURSES?
 	TODO: add error safety around the JSON file in loadFeeds().
 	TODO: logging to a file
+	TODO: remove all formatting from results, including needed text
+	try returning a list of dictionarys for each feed with a title, sum, and results string as well as the total number.
 '''
 
 import feedparser, time, json, logging
@@ -148,7 +150,7 @@ def checkFeed(feed, lastDatetime):
 		feedDatetime = datetime.fromtimestamp(time.mktime(entry.updated_parsed))
 		#Check to see if entry is new.
 		if feedDatetime > lastDatetime:
-			feedText = feedText + " + " + entry.title + "\n"
+			feedText = feedText + entry.title + "\n"
 			counter = counter + 1
 		else:
 			break
