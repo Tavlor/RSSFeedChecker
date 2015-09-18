@@ -19,35 +19,45 @@ from datetime import datetime
 from os import path
 
 def main():
+	feedPath = path.dirname(__file__) + "\\feeds.txt"
 	decorative =	"=-=-=-=-=-=-=-=-=-=\n"
+	
 	result = checkFeedsInList()
+	
 	#print total and summaries
 	print(result[0] + result[1])
+	
 	#print results
 	for string in result[2]:
 		print(decorative + string)
 #*** END OF MAIN **************************************************************
 
-def getFeedListString(path, datetimeFormat):
+def getFeedListString(path, title=True, url=True, checktime=False):
 	result = ""
-	feedJSON, feedDataList = loadFeeds(feedStorePath, datetimeFormat)
-	for item in feedJSON:
-		result = result + item[title] + " ~^~ " + item[URL] + "\n"
+	for item in getFeedList(path):
+		if title:
+			result = result + "=== " + item["title"]
+		if url:
+			result = result + "\n	" + item["URL"]
+		if checktime:
+			result = result + "\n	" + item["latestTimeStamp"]
+		result =  result + "\n"
 	return result.strip()
 #*** END OF getFeedListString() ***********************************************
 
-def getFeedList(path, datetimeFormat):
-	feedJSON, feedDataList = loadFeeds(feedStorePath, datetimeFormat)
+def getFeedList(path):
+	#doesn't return actual feed dictionary - just the JSON stuff
+	feedJSON = loadJSON(path)
+	return feedJSON["feeds"]
 	
 #*** END OF getFeedList() *****************************************************
 
 def loadFeeds(path, datetimeFormat):
 	#TODO: add error safety; automagically add keys that don't exist
 	
+	#load the text file as JOSN
+	newjson = loadJSON(path)
 	newfeeds = []
-	#open the txt file and parse it as json
-	with open(path, 'r') as feedStore:
-		newjson = json.load(feedStore)
 	
 	#parse the urls in the json structure as feeds
 	for index, data in enumerate(newjson["feeds"]):
@@ -58,7 +68,7 @@ def loadFeeds(path, datetimeFormat):
 		if not "latestTimeStamp" in data:
 			data["latestTimeStamp"] = "1970-01-01 00:00:00"
 		if not "title" in data:
-			data["title"] = ""
+			data["title"] = "" #this will be set later.
 		#----------------------------------------------------------------------
 		
 		#construct array of parsed feeds
@@ -68,7 +78,18 @@ def loadFeeds(path, datetimeFormat):
 	#return a tuple of the json structure and the feed list
 	return(newjson, newfeeds)
 #*** END OF loadFeeds() *******************************************************
-	
+
+def loadJSON(path):
+	with open(path, 'r') as store:
+		newjson = json.load(store)
+		return newjson
+#*** END OF loadJSON() ********************************************************
+
+def saveJSON(path, JSON):
+	with open(path, 'w') as store:
+		json.dump(JSON,store, sort_keys=True, indent=4, separators=(',', ': '))
+#*** END OF saveJSON() ********************************************************
+
 def checkFeedsInList():
 	#*** SETUP ****************************************************************
 	#configure the format which time is loaded/saved in.
@@ -119,8 +140,8 @@ def checkFeedsInList():
 
 	#save the new check time in the JSON structure, then save the JSON.
 	feedJSON["lastCheck"] = datetime.strftime(startDatetime, datetimeFormat)
-	with open(feedStorePath, 'w') as feedStore:
-		json.dump(feedJSON,feedStore)
+	
+	saveJSON(feedStorePath, feedJSON)
 		
 	return (heading, fullSummary, results)
 #*** END OF checkFeedsInList() ************************************************
