@@ -1,1 +1,43 @@
+<<<<<<< HEAD
 {"feeds": [{"title": "Technology : NPR", "URL": "http://www.npr.org/templates/rss/podlayer.php?id=1019", "latestTimeStamp": "2015-09-17 21:31:00"}, {"title": "Evil Mad Scientist Laboratories", "URL": "http://www.evilmadscientist.com/feed/", "latestTimeStamp": "2015-09-15 21:33:54"}, {"title": "SnarlBear", "URL": "http://snarlbear.com/rss.php", "latestTimeStamp": "2015-09-17 05:00:00"}, {"title": "Generating Level - Creative Mode Updates", "URL": "http://genlevcreative.thewebcomic.com/rss/", "latestTimeStamp": "2015-09-08 23:14:49"}, {"title": "Turner & Hercules", "URL": "http://turnerandhercules.thecomicseries.com/rss/", "latestTimeStamp": "2015-09-06 20:45:02"}, {"title": "mclelun", "URL": "http://feeds.feedburner.com/mclelun", "latestTimeStamp": "2015-09-05 07:14:48"}, {"title": "C418", "URL": "http://c418.bandcamp.com/feed", "latestTimeStamp": "2014-09-15 13:00:00"}, {"title": "Disasterpeace", "URL": "http://music.disasterpeace.com/feed", "latestTimeStamp": "2015-09-10 13:00:00"}], "DATENOTE": "Format in ISO (YYYY-MM-DD), time is 24h", "lastCheck": "2015-09-17 21:51:40"}
+=======
+{
+	"feeds" : [{
+			"URL" : "http://www.npr.org/templates/rss/podlayer.php?id=1019",
+			"title" : "Technology : NPR",
+			"latestTimeStamp" : "2015-09-15 10:04:00"
+		}, {
+			"URL" : "http://www.evilmadscientist.com/feed/",
+			"title" : "Evil Mad Scientist Laboratories",
+			"latestTimeStamp" : "2015-09-08 23:18:57"
+		}, {
+			"URL" : "http://snarlbear.com/rss.php",
+			"title" : "SnarlBear",
+			"latestTimeStamp" : "2015-09-14 05:00:00"
+		}, {
+			"URL" : "http://genlevcreative.thewebcomic.com/rss/",
+			"title" : "Generating Level - Creative Mode Updates",
+			"latestTimeStamp" : "2015-09-08 23:14:49"
+		}, {
+			"URL" : "http://turnerandhercules.thecomicseries.com/rss/",
+			"title" : "Turner & Hercules",
+			"latestTimeStamp" : "2015-09-06 20:45:02"
+		}, {
+			"URL" : "http://feeds.feedburner.com/mclelun",
+			"title" : "mclelun",
+			"latestTimeStamp" : "2015-09-05 07:14:48"
+		}, {
+			"URL" : "http://c418.bandcamp.com/feed",
+			"title" : "C418",
+			"latestTimeStamp" : "2014-09-15 13:00:00"
+		}, {
+			"URL" : "http://music.disasterpeace.com/feed",
+			"title" : "Disasterpeace",
+			"latestTimeStamp" : "2015-09-10 13:00:00"
+		}
+	],
+	"lastCheck" : "2015-09-15 11:20:44",
+	"DATENOTE" : "Format in ISO (YYYY-MM-DD), time is 24h"
+	"ADDNOTE" : "You only need to add the URL as an element in the list"
+}
+>>>>>>> c727c84a862039a8ce3462cab2c58727fb272751

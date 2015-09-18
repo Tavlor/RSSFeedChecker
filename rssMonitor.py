@@ -7,25 +7,39 @@
 	
 	TODO: allow program to accept date range as an argument to check for 
 	releases in that range.
-	TODO: threading
-	TODO: allow user to request just a summary or the entire thing.
 	TODO: colored text output: use CURSES?
-	TODO: does this take timezones into account?
 	TODO: add error safety around the JSON file in loadFeeds().
+	TODO: logging to a file
+	TODO: remove all formatting from results, including needed text
+	try returning a list of dictionarys for each feed with a title, sum, and results string as well as the total number.
 '''
 
-import feedparser, time, json
+import feedparser, time, json, logging
 from datetime import datetime
 from os import path
 
 def main():
+	decorative =	"=-=-=-=-=-=-=-=-=-=\n"
 	result = checkFeedsInList()
-	print(result[0] + result[1] + result[2])
+	#print total and summaries
+	print(result[0] + result[1])
+	#print results
+	for string in result[2]:
+		print(decorative + string)
 #*** END OF MAIN **************************************************************
 
-def getFeedListString():
-	pass
+def getFeedListString(path, datetimeFormat):
+	result = ""
+	feedJSON, feedDataList = loadFeeds(feedStorePath, datetimeFormat)
+	for item in feedJSON:
+		result = result + item[title] + " ~^~ " + item[URL] + "\n"
+	return result.strip()
 #*** END OF getFeedListString() ***********************************************
+
+def getFeedList(path, datetimeFormat):
+	feedJSON, feedDataList = loadFeeds(feedStorePath, datetimeFormat)
+	
+#*** END OF getFeedList() *****************************************************
 
 def loadFeeds(path, datetimeFormat):
 	#TODO: add error safety; automagically add keys that don't exist
@@ -36,7 +50,17 @@ def loadFeeds(path, datetimeFormat):
 		newjson = json.load(feedStore)
 	
 	#parse the urls in the json structure as feeds
-	for data in newjson["feeds"]:#linkList:
+	for index, data in enumerate(newjson["feeds"]):
+		#--- check all needed components --------------------------------------
+		if not "URL" in data:
+			logging.warning("feed missing URL! INDEX: %i", index)
+			continue #no point in loading it if we don't have a URL
+		if not "latestTimeStamp" in data:
+			data["latestTimeStamp"] = "1970-01-01 00:00:00"
+		if not "title" in data:
+			data["title"] = ""
+		#----------------------------------------------------------------------
+		
 		#construct array of parsed feeds
 		newfeeds.append({"feed":feedparser.parse(data["URL"]), \
 		"latestDatetime":datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
@@ -57,37 +81,29 @@ def checkFeedsInList():
 	totalTally = 0
 	#text to be returned.
 	heading = "" #contains totalTally
-	fullSummary =	"=-= SUMMARY =-=-=-=\n" #contains individual summaries
-	results =		"=-= RESULTS =-=-=-=\n" #contains all the new entry names
-	decorative =	"=-=-=-=-=-=-=-=-=-=\n"
+	fullSummary = "" #contains individual summaries
+	results = [] #results =#contains all the new entry names
 
 	#open the JSON file
-	'''with open(feedStorePath, 'r') as feedStore:
-		feedJSON = json.load(feedStore)'''
 	feedJSON, feedDataList = loadFeeds(feedStorePath, datetimeFormat)
 
 	lastCheck = datetime.strptime(feedJSON["lastCheck"], datetimeFormat)
 	
 	#*** MAIN CODE ************************************************************
-	print("Last checked at " + str(lastCheck) + ",\nnow checking at " \
+	logging.info("Last checked at " + str(lastCheck) + ",\nnow checking at " \
 		+ str(startDatetime))
-
-	#parse all the links into feed objects & place in a dictionary
-	'''for data in feedJSON["feeds"]:#linkList:
-		#construct array of parsed feeds
-		feedDataList.append({"feed":feedparser.parse(data["URL"]), \
-		"latestDatetime":datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
-		'''
 
 	#loop through each feed, building a list of new entries
 	for index, pair in enumerate(feedDataList):
+		#get the feed's results in a tuple.
 		feedResult = checkFeed(pair["feed"], pair["latestDatetime"])
+		
 		#update totalTally
 		totalTally = totalTally + feedResult[0]
 
 		#if there were new items detected, add to results.
 		if feedResult[0] > 0:
-			results = results + feedResult[1] + decorative
+			results.append(feedResult[1])
 
 		#add the summary piece to fullSummary
 		fullSummary = fullSummary + feedResult[2]
@@ -126,7 +142,7 @@ def checkFeed(feed, lastDatetime):
 	feedText = feed.feed.title + "\n"
 	
 	#print(decorative)
-	print(" __ Checking " + feed.feed.title)
+	logging.info("Checking " + feed.feed.title)
 	
 	#Go through entries until you hit an old one.
 	for entry in feed.entries:
@@ -134,7 +150,7 @@ def checkFeed(feed, lastDatetime):
 		feedDatetime = datetime.fromtimestamp(time.mktime(entry.updated_parsed))
 		#Check to see if entry is new.
 		if feedDatetime > lastDatetime:
-			feedText = feedText + " + " + entry.title + "\n"
+			feedText = feedText + entry.title + "\n"
 			counter = counter + 1
 		else:
 			break
