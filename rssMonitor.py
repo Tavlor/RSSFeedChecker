@@ -1,16 +1,13 @@
 ''' ~*~{O}~*~
 	RSSMonitor.py
 	Author: Taylor Smith
-	Description: A utility which monitors your rss feeds and notifies you when
-	they are updated. Uses a json file to keep track of last check and feed 
-	URLs. You can edit this to add new feeds or remove old ones.
+	Description: A utility to check RSS feeds. Uses a json file to keep track
+	of last check and feed URLs. You can edit this to add new feeds or remove old ones.
 	
 	TODO: allow program to accept date range as an argument to check for 
 	releases in that range.
-	TODO: colored text output: use CURSES?
 	TODO: add error safety around the JSON file in loadFeeds().
 	TODO: logging to a file
-	TODO: remove all formatting from results, including needed text
 	try returning a list of dictionarys for each feed with a title, sum, and results string as well as the total number.
 '''
 
@@ -19,22 +16,21 @@ from datetime import datetime
 from os import path
 
 def main():
-	feedPath = path.dirname(__file__) + "\\feeds.txt"
 	decorative =	"=-=-=-=-=-=-=-=-=-=\n"
 	
 	result = checkFeedsInList()
 	
 	#print total and summaries
-	print(result[0] + result[1])
+	print(result[1] + result[2])
 	
 	#print results
-	for string in result[2]:
+	for string in result[3]:
 		print(decorative + string)
 #*** END OF MAIN **************************************************************
 
-def getFeedListString(path, title=True, url=True, checktime=False):
+def getFeedListString(filePath, title=True, url=True, checktime=False):
 	result = ""
-	for item in getFeedList(path):
+	for item in getFeedList(filePath):
 		if title:
 			result = result + "=== " + item["title"]
 		if url:
@@ -45,20 +41,30 @@ def getFeedListString(path, title=True, url=True, checktime=False):
 	return result.strip()
 #*** END OF getFeedListString() ***********************************************
 
-def getFeedList(path):
+def getFeedList(filePath):
 	#doesn't return actual feed dictionary - just the JSON stuff
-	feedJSON = loadJSON(path)
+	feedJSON = loadJSON(filePath)
 	return feedJSON["feeds"]
 	
 #*** END OF getFeedList() *****************************************************
 
-def loadFeeds(path, datetimeFormat):
-	#TODO: add error safety; automagically add keys that don't exist
+def loadFeeds(filePath, datetimeFormat):
+	#TODO: add error safety;
 	
 	#load the text file as JOSN
-	newjson = loadJSON(path)
+	newjson = loadJSON(filePath)
 	newfeeds = []
 	
+	#failure protections. make sure you have whay you need.
+	if not "feeds" in newjson:
+		logging.warning("feeds missing!")
+		newjson["feeds"] = []
+	elif not type(newjson["feeds"]) == list:
+		logging.warning("feeds not of type list!")
+		newjson["feeds"] = []
+	
+	if not "lastCheck" in newjson:
+		newjson["lastCheck"] = "1970-01-01 00:00:00"
 	#parse the urls in the json structure as feeds
 	for index, data in enumerate(newjson["feeds"]):
 		#--- check all needed components --------------------------------------
@@ -70,54 +76,58 @@ def loadFeeds(path, datetimeFormat):
 		if not "title" in data:
 			data["title"] = "" #this will be set later.
 		#----------------------------------------------------------------------
-		
 		#construct array of parsed feeds
 		newfeeds.append({"feed":feedparser.parse(data["URL"]), \
 		"latestDatetime":datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
-	
+
 	#return a tuple of the json structure and the feed list
 	return(newjson, newfeeds)
 #*** END OF loadFeeds() *******************************************************
 
-def loadJSON(path):
-	with open(path, 'r') as store:
-		newjson = json.load(store)
-		return newjson
+def loadJSON(filePath):
+	defaultJSON = '{"feeds":[], "lastCheck":"1970-01-01 00:00:00"}'
+	with open(filePath, 'r') as store:
+		try:
+			newjson = json.load(store)
+		except ValueError:
+			logging.warning("Invalid json file!")
+			newjson = json.loads(defaultJSON)
+	return newjson
 #*** END OF loadJSON() ********************************************************
 
-def saveJSON(path, JSON):
-	with open(path, 'w') as store:
+def saveJSON(filePath, JSON):
+	with open(filePath, 'w') as store:
 		json.dump(JSON,store, sort_keys=True, indent=4, separators=(',', ': '))
 #*** END OF saveJSON() ********************************************************
 
-def checkFeedsInList():
-	#*** SETUP ****************************************************************
+def checkFeedsInList(filePath=""):
+	#--- SETUP ----------------------------------------------------------------
 	#configure the format which time is loaded/saved in.
 	#CAUTION! Changing this might cause issues with parsing the time.
 	datetimeFormat = "%Y-%m-%d %H:%M:%S"
 	
-	feedStorePath = path.dirname(__file__) + "\\feeds.txt"
+	#make sure that you have a path. by default filePath = ""
+	if filePath == "":
+		filePath = path.dirname(__file__) + "\\test.txt"
+	
 	startDatetime = datetime.now()
-	feedDataList = []
+	#feedDataList = []
 	totalTally = 0
-	#text to be returned.
 	heading = "" #contains totalTally
 	fullSummary = "" #contains individual summaries
 	results = [] #results =#contains all the new entry names
 
 	#open the JSON file
-	feedJSON, feedDataList = loadFeeds(feedStorePath, datetimeFormat)
+	feedJSON, feedDataList = loadFeeds(filePath, datetimeFormat)
 
-	lastCheck = datetime.strptime(feedJSON["lastCheck"], datetimeFormat)
-	
-	#*** MAIN CODE ************************************************************
-	logging.info("Last checked at " + str(lastCheck) + ",\nnow checking at " \
-		+ str(startDatetime))
+	#--- MAIN CODE ------------------------------------------------------------
+	logging.info("Last checked at " + str(feedJSON["lastCheck"]) + \
+	",\nnow checking at " + str(startDatetime))
 
 	#loop through each feed, building a list of new entries
 	for index, pair in enumerate(feedDataList):
 		#get the feed's results in a tuple.
-		feedResult = checkFeed(pair["feed"], pair["latestDatetime"])
+		feedResult = getNewEntries(pair["feed"], pair["latestDatetime"])
 		
 		#update totalTally
 		totalTally = totalTally + feedResult[0]
@@ -141,16 +151,17 @@ def checkFeedsInList():
 	#save the new check time in the JSON structure, then save the JSON.
 	feedJSON["lastCheck"] = datetime.strftime(startDatetime, datetimeFormat)
 	
-	saveJSON(feedStorePath, feedJSON)
+	saveJSON(filePath, feedJSON)
 		
-	return (heading, fullSummary, results)
+	return (totalTally, heading, fullSummary, results)
 #*** END OF checkFeedsInList() ************************************************
 	
-def checkFeed(feed, lastDatetime):
+def getNewEntries(feed, lastDatetime, firstDatetime = 0):
 	#requires a feed object and a datetime to compare, returns a tuple containing
 	#the number of new elements, a string of text representing those elements
 	#and a summary string.
 
+	#--- SETUP ----------------------------------------------------------------
 	#get the most recent timestamp, will be returned.
 	latestTimeStamp = \
 	datetime.fromtimestamp(time.mktime(feed.entries[0].updated_parsed))
@@ -162,7 +173,7 @@ def checkFeed(feed, lastDatetime):
 	feedSummary = ""
 	feedText = feed.feed.title + "\n"
 	
-	#print(decorative)
+	#--- MAIN CODE ------------------------------------------------------------
 	logging.info("Checking " + feed.feed.title)
 	
 	#Go through entries until you hit an old one.
@@ -190,7 +201,7 @@ def checkFeed(feed, lastDatetime):
 	
 	#return count, the two strings, and the most recent timestamp in a tuple
 	return (counter, feedText, feedSummary, latestTimeStamp)
-#*** END OF checkFeed() *******************************************************
+#*** END OF getNewEntries() ***************************************************
 	
 #this allows the program to run on it's own. If the file is imported, then 
 #__name__ will equal the module's name.

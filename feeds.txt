@@ -1,10 +1,10 @@
 {
-    "ADDNOTE": "You only need to add the URL as an element in the list",
+    "ADDNOTE": "Only the feed URL is needed to function, the other details will be added.",
     "DATENOTE": "Format in ISO (YYYY-MM-DD), time is 24h",
     "feeds": [
         {
             "URL": "http://www.npr.org/templates/rss/podlayer.php?id=1019",
-            "latestTimeStamp": "2015-09-18 14:05:53",
+            "latestTimeStamp": "2015-09-18 21:31:43",
             "title": "Technology : NPR"
         },
         {
@@ -43,5 +43,5 @@
             "title": "Disasterpeace"
         }
     ],
-    "lastCheck": "2015-09-18 08:57:56"
+    "lastCheck": "2015-09-18 19:24:28"
 }
