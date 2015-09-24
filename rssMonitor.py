@@ -18,7 +18,7 @@ from os import path
 def main():
 	decorative =	"=-=-=-=-=-=-=-=-=-=\n"
 	
-	result = checkFeedsInList()
+	result = checkFeeds()
 	
 	#print total and summaries
 	print(result[1] + result[2])
@@ -100,7 +100,7 @@ def saveJSON(filePath, JSON):
 		json.dump(JSON,store, sort_keys=True, indent=4, separators=(',', ': '))
 #*** END OF saveJSON() ********************************************************
 
-def checkFeedsInList(filePath=""):
+def checkFeeds(filePath=""):
 	#--- SETUP ----------------------------------------------------------------
 	#configure the format which time is loaded/saved in.
 	#CAUTION! Changing this might cause issues with parsing the time.
@@ -108,7 +108,7 @@ def checkFeedsInList(filePath=""):
 	
 	#make sure that you have a path. by default filePath = ""
 	if filePath == "":
-		filePath = path.dirname(__file__) + "\\test.txt"
+		filePath = path.dirname(__file__) + "\\feeds.txt"
 	
 	startDatetime = datetime.now()
 	#feedDataList = []
@@ -154,7 +154,7 @@ def checkFeedsInList(filePath=""):
 	saveJSON(filePath, feedJSON)
 		
 	return (totalTally, heading, fullSummary, results)
-#*** END OF checkFeedsInList() ************************************************
+#*** END OF checkFeeds() ******************************************************
 	
 def getNewEntries(feed, lastDatetime, firstDatetime = 0):
 	#requires a feed object and a datetime to compare, returns a tuple containing
@@ -202,7 +202,10 @@ def getNewEntries(feed, lastDatetime, firstDatetime = 0):
 	#return count, the two strings, and the most recent timestamp in a tuple
 	return (counter, feedText, feedSummary, latestTimeStamp)
 #*** END OF getNewEntries() ***************************************************
-	
+
+def listFeeds():
+#TODO: this should return a count of all feeds and list of feeds w/ last update
+	pass
 #this allows the program to run on it's own. If the file is imported, then 
 #__name__ will equal the module's name.
 if __name__ == "__main__":
