@@ -205,7 +205,10 @@ def getNewEntries(feed, lastDatetime, firstDatetime = 0):
 
 def listFeeds():
 #TODO: this should return a count of all feeds and list of feeds w/ last update
-	pass
+	#open the JSON file
+	feedJSON, feedDataList = loadFeeds(filePath, datetimeFormat)
+#*** END OF listFeeds() *******************************************************
+
 #this allows the program to run on it's own. If the file is imported, then 
 #__name__ will equal the module's name.
 if __name__ == "__main__":

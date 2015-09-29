@@ -4,17 +4,17 @@
     "feeds": [
         {
             "URL": "http://www.npr.org/templates/rss/podlayer.php?id=1019",
-            "latestTimeStamp": "2015-09-23 10:19:00",
+            "latestTimeStamp": "2015-09-28 22:37:48",
             "title": "Technology : NPR"
         },
         {
             "URL": "http://www.evilmadscientist.com/feed/",
-            "latestTimeStamp": "2015-09-23 16:54:53",
+            "latestTimeStamp": "2015-09-27 14:15:22",
             "title": "Evil Mad Scientist Laboratories"
         },
         {
             "URL": "http://snarlbear.com/rss.php",
-            "latestTimeStamp": "2015-09-21 05:00:00",
+            "latestTimeStamp": "2015-09-28 05:00:00",
             "title": "SnarlBear"
         },
         {
@@ -41,7 +41,12 @@
             "URL": "http://music.disasterpeace.com/feed",
             "latestTimeStamp": "2015-09-10 13:00:00",
             "title": "Disasterpeace"
+        },
+        {
+            "URL": "http://capsalot.thecomicseries.com/rss/",
+            "latestTimeStamp": "2015-09-27 23:36:09",
+            "title": "Capsalot"
         }
     ],
-    "lastCheck": "2015-09-23 16:54:52"
+    "lastCheck": "2015-09-28 20:47:11"
 }
