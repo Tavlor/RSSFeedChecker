@@ -4,22 +4,26 @@
     "feeds": [
         {
             "URL": "http://www.npr.org/templates/rss/podlayer.php?id=1019",
-            "latestTimeStamp": "2015-09-28 22:37:48",
+            "latestTimeStamp": "2015-10-30 22:48:00",
+            "short": "NPR Tech",
             "title": "Technology : NPR"
         },
         {
             "URL": "http://www.evilmadscientist.com/feed/",
-            "latestTimeStamp": "2015-09-27 14:15:22",
+            "latestTimeStamp": "2015-10-31 17:08:44",
+            "short": "EMSL",
             "title": "Evil Mad Scientist Laboratories"
         },
         {
             "URL": "http://snarlbear.com/rss.php",
-            "latestTimeStamp": "2015-09-28 05:00:00",
+            "latestTimeStamp": "2015-10-29 05:00:00",
+            "short": "snarl",
             "title": "SnarlBear"
         },
         {
             "URL": "http://genlevcreative.thewebcomic.com/rss/",
-            "latestTimeStamp": "2015-09-08 23:14:49",
+            "latestTimeStamp": "2015-09-29 23:08:43",
+            "short": "minecraft comic",
             "title": "Generating Level - Creative Mode Updates"
         },
         {
@@ -33,20 +37,26 @@
             "title": "mclelun"
         },
         {
-            "URL": "http://c418.bandcamp.com/feed",
-            "latestTimeStamp": "2014-09-15 13:00:00",
-            "title": "C418"
-        },
-        {
-            "URL": "http://music.disasterpeace.com/feed",
-            "latestTimeStamp": "2015-09-10 13:00:00",
-            "title": "Disasterpeace"
-        },
-        {
             "URL": "http://capsalot.thecomicseries.com/rss/",
-            "latestTimeStamp": "2015-09-27 23:36:09",
+            "latestTimeStamp": "2015-10-26 20:36:55",
             "title": "Capsalot"
+        },
+        {
+            "URL": "https://www.us-cert.gov/ncas/current-activity.xml",
+            "latestTimeStamp": "2015-10-27 17:25:46",
+            "short": "US-CERT",
+            "title": "US-CERT Current Activity"
+        },
+        {
+            "URL": "http://demonroad.thewebcomic.com/rss/",
+            "latestTimeStamp": "2015-10-29 10:30:29",
+            "title": "The Legend Of Zelda: The Demon Road Updates"
+        },
+        {
+            "URL": "http://legouniverse.wikia.com/wiki/Special:RecentChanges?feed=rss",
+            "latestTimeStamp": "2015-10-27 04:34:23",
+            "title": "LEGO Universe Wiki  - Recent changes [en]"
         }
     ],
-    "lastCheck": "2015-09-28 20:47:11"
+    "lastCheck": "2015-10-31 18:22:49"
 }
