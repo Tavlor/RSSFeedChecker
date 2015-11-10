@@ -1,7 +1,8 @@
 ''' ~*~{O}~*~
 	RSSMonitor.py
 	Author: Taylor Smith
-	Description: A utility to check RSS feeds. Uses a json file to keep track
+	Comment: 
+		A utility to check RSS feeds. Uses a json file to keep track
 	of last check and feed URLs. You can edit this to add new feeds or remove old ones.
 	
 	TODO: allow program to accept date range as an argument to check for 
@@ -42,65 +43,12 @@ def getFeedListString(filePath, title=True, url=True, checktime=False):
 	return result.strip()
 #*** END OF getFeedListString() ***********************************************
 
-def getFeedList(filePath):
-	#doesn't return actual feed dictionary - just the JSON stuff
-	feedJSON = loadJSON(filePath)
-	return feedJSON["feeds"]
-	
-#*** END OF getFeedList() *****************************************************
-
-def loadFeeds(filePath, datetimeFormat):
-	#TODO: add error safety;
-	
-	#load the text file as JOSN
-	newjson = loadJSON(filePath)
-	newfeeds = []
-	
-	#--- fault detection. make sure you have whay you need. -------------------
-	
-	if not "feeds" in newjson:
-		logging.warning("feeds missing!")
-		newjson["feeds"] = []
-	elif not type(newjson["feeds"]) == list:
-		logging.warning("feeds not of type list!")
-		newjson["feeds"] = []
-	
-	if not "lastCheck" in newjson:
-		newjson["lastCheck"] = "1970-01-01 00:00:00"
-	if not "lastNotify" in newjson:
-		newjson["lastNotify"] = "1970-01-01 00:00:00"
-	if not "lastDaily" in newjson:
-		newjson["lastDaily"] = "1970-01-01 00:00:00"
-	if not "lastWeekly" in newjson:
-		newjson["lastWeekly"] = "1970-01-01 00:00:00"
-	#--- end of main fault detection. Feed-specific is in following loop. -----
-	
-	#parse the urls in the json structure as feeds
-	for index, data in enumerate(newjson["feeds"]):
-		#--- feed fault detection ---------------------------------------------
-		if not "URL" in data:
-			logging.warning("feed missing URL! INDEX: %i", index)
-			continue #no point in loading it if we don't have a URL
-		if not "latestTimeStamp" in data:
-			data["latestTimeStamp"] = "1970-01-01 00:00:00"
-		if not "title" in data:
-			data["title"] = "" #this will be set later when the feed is parsed.
-		if not "class" in data:
-			data["class"] = "$$$$$"
-		if not "urgency" in data:
-			data["urgency"] = 1
-			#possible urgencies: 0=immediate; 1=daily; 2=weekly
-		#----------------------------------------------------------------------
-		
-		#construct array of parsed feeds
-		newfeeds.append({"feed":feedparser.parse(data["URL"]), \
-		"latestDatetime":datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
-
-	#return a tuple of the json structure and the feed list
-	return(newjson, newfeeds)
-#*** END OF loadFeeds() *******************************************************
+def sortFeedListByClass(feedList):
+	pass
+#*** END OF sortFeedListByClass() *********************************************
 
 def loadJSON(filePath):
+	#This function is used to load the .TXT file as a JSON structure
 	defaultJSON = '{"feeds":[], "lastCheck":"1970-01-01 00:00:00"}'
 	with open(filePath, 'r') as store:
 		try:
@@ -111,7 +59,76 @@ def loadJSON(filePath):
 	return newjson
 #*** END OF loadJSON() ********************************************************
 
+def getFeedList(filePath):
+	#doesn't return actual feed dictionary - just the JSON stuff
+	feedJSON = loadJSON(filePath)
+	return feedJSON["feeds"]
+	
+#*** END OF getFeedList() *****************************************************
+
+def loadFeeds(filePath, datetimeFormat):
+	#load the .TXT file as a JSON structure. feeds are in a list called "feeds"
+	newjson = loadJSON(filePath)
+	newfeeds = []
+	
+	#--- fault detection. make sure you have whay you need. -------------------
+	
+	#check that the feeds list exists and that it is indeed a list.
+	if not "feeds" in newjson:
+		logging.warning("feeds missing!")
+		newjson["feeds"] = []
+
+	elif not type(newjson["feeds"]) == list:
+		logging.warning("feeds not of type list!")
+		newjson["feeds"] = []
+	#-----------------------------------------------------------------------<<<
+
+	if not "lastCheck" in newjson:
+		newjson["lastCheck"] = "1970-01-01 00:00:00"
+
+	if not "lastNotify" in newjson:
+		newjson["lastNotify"] = "1970-01-01 00:00:00"
+
+	if not "lastDaily" in newjson:
+		newjson["lastDaily"] = "1970-01-01 00:00:00"
+
+	if not "lastWeekly" in newjson:
+		newjson["lastWeekly"] = "1970-01-01 00:00:00"
+	#--- end of main fault detection. Feed-specific is in following loop. -----
+	
+	#parse the urls in the json structure as feeds
+	for index, data in enumerate(newjson["feeds"]):
+		#--- feed fault detection ---------------------------------------------
+		if not "URL" in data:
+			logging.warning("feed missing URL! INDEX: %i", index)
+			continue #no point in loading it if we don't have a URL
+
+		if not "latestTimeStamp" in data:
+			data["latestTimeStamp"] = "1970-01-01 00:00:00"
+
+		if not "title" in data:
+			data["title"] = ""
+			#"title" will be set later when the feed is parsed.
+
+		if not "class" in data:
+			data["class"] = "$$$$$"
+
+		if not "urgency" in data:
+			data["urgency"] = 1
+			#possible urgencies: 0=immediate; 1=daily; 2=weekly
+		#----------------------------------------------------------------------
+		
+		#construct array of parsed feeds
+		newfeeds.append({"feed":feedparser.parse(data["URL"]), \
+		"latestDatetime":datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
+		#--- end of for loop --------------------------------------------------
+
+	#return a tuple of the json list and the parsed feed list
+	return(newjson, newfeeds)
+#*** END OF loadFeeds() *******************************************************
+
 def saveJSON(filePath, JSON):
+	#dumps list "JSON" into a .TXT as a json structure
 	with open(filePath, 'w') as store:
 		json.dump(JSON,store, sort_keys=True, indent=4, separators=(',', ': '))
 #*** END OF saveJSON() ********************************************************
@@ -162,8 +179,14 @@ def checkFeeds(filePath=""):
 		#store the feed name as well.
 		feedJSON["feeds"][index]["title"] = pair["feed"].feed.title
 
-	heading = "There are " + str(totalTally) + \
-		" new entries in all your feeds.\n"
+		#Contextual output! total number of entries effects the main summary
+		if totalTally == 0:
+			heading = "There are no new entries in any of your feeds.\n"
+		elif totalTally == 1:
+			heading = "There is 1 new entry in all your feeds.\n"
+		else:
+			heading = "There are " + str(totalTally) + \
+				" new entries in all your feeds.\n"
 
 	#save the new check time in the JSON structure, then save the JSON.
 	feedJSON["lastCheck"] = datetime.strftime(startDatetime, datetimeFormat)
@@ -204,14 +227,12 @@ def getNewEntries(feed, lastDatetime, firstDatetime = 0):
 		else:
 			break
 
-	#somewhat intelligent output. Stupid, but clever enough.
+	#Feed summary formatting. 
 	if counter == 0:
 		#don't return anything if nothing is new
 		pass
-	elif counter == 1:
-		feedSummary = "There is 1 new entry in " + feed.feed.title + ".\n" 
 	else:
-		feedSummary = "There are " + str(counter) + " new entries in " + \
+		feedSummary = " } " + str(counter) + " new entries in " + \
 		feed.feed.title + ".\n"
 
 	feedText = feedText
@@ -220,13 +241,7 @@ def getNewEntries(feed, lastDatetime, firstDatetime = 0):
 	return (counter, feedText, feedSummary, latestTimeStamp)
 #*** END OF getNewEntries() ***************************************************
 
-def listFeeds():
-#TODO: this should return a count of all feeds and list of feeds w/ last update
-	#open the JSON file
-	feedJSON, feedDataList = loadFeeds(filePath, datetimeFormat)
-#*** END OF listFeeds() *******************************************************
-
 #this allows the program to run on it's own. If the file is imported, then 
-#__name__ will equal the module's name.
+#__name__ will be the module's name.
 if __name__ == "__main__":
 	main()
