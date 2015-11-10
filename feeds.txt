@@ -4,59 +4,96 @@
     "feeds": [
         {
             "URL": "http://www.npr.org/templates/rss/podlayer.php?id=1019",
-            "latestTimeStamp": "2015-10-30 22:48:00",
+            "class": "news",
+            "latestTimeStamp": "2015-11-09 21:31:00",
             "short": "NPR Tech",
-            "title": "Technology : NPR"
+            "title": "Technology : NPR",
+            "urgency": 2
         },
         {
             "URL": "http://www.evilmadscientist.com/feed/",
-            "latestTimeStamp": "2015-10-31 17:08:44",
+            "class": "blog",
+            "latestTimeStamp": "2015-11-06 18:35:19",
             "short": "EMSL",
-            "title": "Evil Mad Scientist Laboratories"
+            "title": "Evil Mad Scientist Laboratories",
+            "urgency": 1
         },
         {
             "URL": "http://snarlbear.com/rss.php",
-            "latestTimeStamp": "2015-10-29 05:00:00",
+            "class": "webcomic",
+            "latestTimeStamp": "2015-11-09 05:00:00",
             "short": "snarl",
-            "title": "SnarlBear"
+            "title": "Snarlbear",
+            "urgency": 1
         },
         {
             "URL": "http://genlevcreative.thewebcomic.com/rss/",
-            "latestTimeStamp": "2015-09-29 23:08:43",
+            "class": "webcomic",
+            "latestTimeStamp": "2015-09-30 00:08:43",
             "short": "minecraft comic",
-            "title": "Generating Level - Creative Mode Updates"
+            "title": "Generating Level - Creative Mode Updates",
+            "urgency": 1
         },
         {
             "URL": "http://turnerandhercules.thecomicseries.com/rss/",
+            "class": "webcomic",
             "latestTimeStamp": "2015-09-06 20:45:02",
-            "title": "Turner & Hercules"
+            "title": "Turner & Hercules",
+            "urgency": 0
         },
         {
             "URL": "http://feeds.feedburner.com/mclelun",
+            "class": "art",
             "latestTimeStamp": "2015-09-05 07:14:48",
-            "title": "mclelun"
+            "title": "mclelun",
+            "urgency": 1
         },
         {
             "URL": "http://capsalot.thecomicseries.com/rss/",
-            "latestTimeStamp": "2015-10-26 20:36:55",
-            "title": "Capsalot"
+            "class": "webcomic",
+            "latestTimeStamp": "2015-11-08 23:24:21",
+            "title": "Capsalot",
+            "urgency": 1
         },
         {
             "URL": "https://www.us-cert.gov/ncas/current-activity.xml",
-            "latestTimeStamp": "2015-10-27 17:25:46",
+            "class": "news",
+            "latestTimeStamp": "2015-11-05 02:48:07",
             "short": "US-CERT",
-            "title": "US-CERT Current Activity"
+            "title": "US-CERT Current Activity",
+            "urgency": 0
         },
         {
             "URL": "http://demonroad.thewebcomic.com/rss/",
-            "latestTimeStamp": "2015-10-29 10:30:29",
-            "title": "The Legend Of Zelda: The Demon Road Updates"
+            "class": "webcomic",
+            "latestTimeStamp": "2015-11-03 18:22:49",
+            "title": "The Legend Of Zelda: The Demon Road Updates",
+            "urgency": 1
+        },
+        {
+            "URL": "http://blogs.technet.com/b/sysinternals/rss.aspx",
+            "class": "tech",
+            "latestTimeStamp": "2015-10-27 01:32:38",
+            "title": "Sysinternals Site Discussion",
+            "urgency": 2
+        },
+        {
+            "URL": "http://rasher.dk/rockbox/majorchanges.php",
+            "class": "tech",
+            "latestTimeStamp": "2015-10-07 11:00:00",
+            "title": "Rockbox Major Changes",
+            "urgency": 1
         },
         {
             "URL": "http://legouniverse.wikia.com/wiki/Special:RecentChanges?feed=rss",
-            "latestTimeStamp": "2015-10-27 04:34:23",
-            "title": "LEGO Universe Wiki  - Recent changes [en]"
+            "class": "community",
+            "latestTimeStamp": "2015-11-08 23:19:08",
+            "title": "LEGO Universe Wiki  - Recent changes [en]",
+            "urgency": 1
         }
     ],
-    "lastCheck": "2015-10-31 18:22:49"
+    "lastCheck": "2015-11-09 17:24:55",
+    "lastDaily": "1970-01-01 00:00:00",
+    "lastNotify": "1970-01-01 00:00:00",
+    "lastWeekly": "1970-01-01 00:00:00"
 }

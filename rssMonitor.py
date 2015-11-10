@@ -9,6 +9,7 @@
 	TODO: add error safety around the JSON file in loadFeeds().
 	TODO: logging to a file
 	try returning a list of dictionarys for each feed with a title, sum, and results string as well as the total number.
+	TODO: let program announce some feeds immediatly, daily, or weekly. Framework in JSON is set up already.
 '''
 
 import feedparser, time, json, logging
@@ -55,7 +56,8 @@ def loadFeeds(filePath, datetimeFormat):
 	newjson = loadJSON(filePath)
 	newfeeds = []
 	
-	#failure protections. make sure you have whay you need.
+	#--- fault detection. make sure you have whay you need. -------------------
+	
 	if not "feeds" in newjson:
 		logging.warning("feeds missing!")
 		newjson["feeds"] = []
@@ -65,17 +67,31 @@ def loadFeeds(filePath, datetimeFormat):
 	
 	if not "lastCheck" in newjson:
 		newjson["lastCheck"] = "1970-01-01 00:00:00"
+	if not "lastNotify" in newjson:
+		newjson["lastNotify"] = "1970-01-01 00:00:00"
+	if not "lastDaily" in newjson:
+		newjson["lastDaily"] = "1970-01-01 00:00:00"
+	if not "lastWeekly" in newjson:
+		newjson["lastWeekly"] = "1970-01-01 00:00:00"
+	#--- end of main fault detection. Feed-specific is in following loop. -----
+	
 	#parse the urls in the json structure as feeds
 	for index, data in enumerate(newjson["feeds"]):
-		#--- check all needed components --------------------------------------
+		#--- feed fault detection ---------------------------------------------
 		if not "URL" in data:
 			logging.warning("feed missing URL! INDEX: %i", index)
 			continue #no point in loading it if we don't have a URL
 		if not "latestTimeStamp" in data:
 			data["latestTimeStamp"] = "1970-01-01 00:00:00"
 		if not "title" in data:
-			data["title"] = "" #this will be set later.
+			data["title"] = "" #this will be set later when the feed is parsed.
+		if not "class" in data:
+			data["class"] = "$$$$$"
+		if not "urgency" in data:
+			data["urgency"] = 1
+			#possible urgencies: 0=immediate; 1=daily; 2=weekly
 		#----------------------------------------------------------------------
+		
 		#construct array of parsed feeds
 		newfeeds.append({"feed":feedparser.parse(data["URL"]), \
 		"latestDatetime":datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
@@ -107,6 +123,7 @@ def checkFeeds(filePath=""):
 	datetimeFormat = "%Y-%m-%d %H:%M:%S"
 	
 	#make sure that you have a path. by default filePath = ""
+	#if filePath is still default, set it to feeds.txt in the program folder
 	if filePath == "":
 		filePath = path.dirname(__file__) + "\\feeds.txt"
 	
