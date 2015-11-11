@@ -119,21 +119,24 @@ def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
 	#parse the urls in the json structure as feeds
 	for index, data in enumerate(newjson["feeds"]):
 		#--- feed fault detection ---------------------------------------------
-		if not "url" in data:
+		if not "url" in data: #check for feed url
 			logging.warning("feed missing URL! INDEX: %i", index)
 			continue #no point in loading it if we don't have a URL
+		
+		if not "url-home" in data: #check for home url
+			data["url-home"] = "$$$$$"
 
-		if not "latestTimeStamp" in data:
+		if not "latestTimeStamp" in data: #check for the timestamp
 			data["latestTimeStamp"] = "1970-01-01 00:00:00"
 
-		if not "title" in data:
+		if not "title" in data: #check for the feed's title
 			data["title"] = ""
 			#"title" will be set later when the feed is parsed.
 
-		if not "class" in data:
-			data["class"] = "$$$$$"
+		if not "class" in data: #check for the feed's class
+			data["class"] = "$$$$$" #TODO: Is there a way to get this from the parsed feed?
 
-		if not "urgency" in data:
+		if not "urgency" in data: #check for the feed's urgency
 			data["urgency"] = 1
 			#possible urgencies: 0=immediate; 1=daily; 2=weekly
 		#----------------------------------------------------------------------
