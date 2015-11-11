@@ -22,6 +22,13 @@ def main():
 	
 	result = checkFeeds()
 	
+	#for testing
+	#filePath = path.dirname(__file__) + "\\feeds.txt"
+	#feedJSON, parsedFeeds = loadFeeds(filePath)
+	#rewriteTimestamps(feedJSON)
+	#saveJSON(filePath, feedJSON)
+	
+	
 	#print total and summaries
 	print(result[1] + result[2])
 	
@@ -43,8 +50,21 @@ def getFeedListString(filePath, title=True, url=True, checktime=False):
 	return result.strip()
 #*** END OF getFeedListString() ***********************************************
 
-def sortFeedListByClass(feedList):
-	pass
+def getClass(feedData):
+	return feedData["class"]
+#*** END OF getClass() ********************************************************
+
+def sortJSONFeedListByClass(feedJSON):
+	return sorted(feedJSON, key=getClass)
+#*** END OF sortFeedListByClass() *********************************************
+
+def rewriteTimestamps(feedJSON, newDate="1970-01-01 00:00:00"):
+	#overwrites all the feed timestamps in the .TXT json structure
+	#handy if you've been testing and missed an update
+	for feedData in feedJSON["feeds"]:
+		feedData["latestTimeStamp"] = newDate
+	
+	return feedJSON
 #*** END OF sortFeedListByClass() *********************************************
 
 def loadJSON(filePath):
@@ -66,10 +86,14 @@ def getFeedList(filePath):
 	
 #*** END OF getFeedList() *****************************************************
 
-def loadFeeds(filePath, datetimeFormat):
+def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
 	#load the .TXT file as a JSON structure. feeds are in a list called "feeds"
+	
+	#the unparsed JSON data
 	newjson = loadJSON(filePath)
-	newfeeds = []
+	
+	# a list of parsed feeds. Will NOT contain any data from the JSON
+	parsedFeeds = []
 	
 	#--- fault detection. make sure you have whay you need. -------------------
 	
@@ -99,7 +123,7 @@ def loadFeeds(filePath, datetimeFormat):
 	#parse the urls in the json structure as feeds
 	for index, data in enumerate(newjson["feeds"]):
 		#--- feed fault detection ---------------------------------------------
-		if not "URL" in data:
+		if not "url" in data:
 			logging.warning("feed missing URL! INDEX: %i", index)
 			continue #no point in loading it if we don't have a URL
 
@@ -119,16 +143,19 @@ def loadFeeds(filePath, datetimeFormat):
 		#----------------------------------------------------------------------
 		
 		#construct array of parsed feeds
-		newfeeds.append({"feed":feedparser.parse(data["URL"]), \
+		parsedFeeds.append({"feed":feedparser.parse(data["url"]), \
 		"latestDatetime":datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
-		#--- end of for loop --------------------------------------------------
+	#--- end of for loop --------------------------------------------------
 
 	#return a tuple of the json list and the parsed feed list
-	return(newjson, newfeeds)
+	return(newjson, parsedFeeds)
 #*** END OF loadFeeds() *******************************************************
 
 def saveJSON(filePath, JSON):
 	#dumps list "JSON" into a .TXT as a json structure
+	
+	#sort the list of feed data by class (may comment out as needed)
+	#JSON["feeds"] = sortJSONFeedListByClass(JSON["feeds"])
 	with open(filePath, 'w') as store:
 		json.dump(JSON,store, sort_keys=True, indent=4, separators=(',', ': '))
 #*** END OF saveJSON() ********************************************************
@@ -145,21 +172,20 @@ def checkFeeds(filePath=""):
 		filePath = path.dirname(__file__) + "\\feeds.txt"
 	
 	startDatetime = datetime.now()
-	#feedDataList = []
 	totalTally = 0
 	heading = "" #contains totalTally
 	fullSummary = "" #contains individual summaries
 	results = [] #results =#contains all the new entry names
 
 	#open the JSON file
-	feedJSON, feedDataList = loadFeeds(filePath, datetimeFormat)
+	feedJSON, parsedFeeds = loadFeeds(filePath, datetimeFormat)
 
 	#--- MAIN CODE ------------------------------------------------------------
 	logging.info("Last checked at " + str(feedJSON["lastCheck"]) + \
 	",\nnow checking at " + str(startDatetime))
 
 	#loop through each feed, building a list of new entries
-	for index, pair in enumerate(feedDataList):
+	for index, pair in enumerate(parsedFeeds):
 		#get the feed's results in a tuple.
 		feedResult = getNewEntries(pair["feed"], pair["latestDatetime"])
 		

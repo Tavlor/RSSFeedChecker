@@ -3,103 +3,103 @@
     "DATENOTE": "Format in ISO (YYYY-MM-DD), time is 24h",
     "feeds": [
         {
-            "URL": "http://www.npr.org/templates/rss/podlayer.php?id=1019",
-            "class": "news",
-            "latestTimeStamp": "2015-11-09 21:31:00",
-            "short": "NPR Tech",
-            "title": "Technology : NPR",
-            "urgency": 2
+            "class": "art",
+            "latestTimeStamp": "2015-09-05 07:14:48",
+            "title": "mclelun",
+            "urgency": 1,
+            "url": "http://feeds.feedburner.com/mclelun"
         },
         {
-            "URL": "http://www.evilmadscientist.com/feed/",
             "class": "blog",
             "latestTimeStamp": "2015-11-06 18:35:19",
             "short": "EMSL",
             "title": "Evil Mad Scientist Laboratories",
-            "urgency": 1
+            "urgency": 1,
+            "url": "http://www.evilmadscientist.com/feed/"
         },
         {
-            "URL": "http://mojang.com/feed.xml",
             "class": "blog",
             "latestTimeStamp": "2015-11-06 12:33:00",
             "title": "Mojang",
-            "urgency": 1
+            "urgency": 1,
+            "url": "http://mojang.com/feed.xml"
         },
         {
-            "URL": "http://snarlbear.com/rss.php",
+            "class": "community",
+            "latestTimeStamp": "2015-11-08 23:19:08",
+            "title": "LEGO Universe Wiki  - Recent changes [en]",
+            "urgency": 1,
+            "url": "http://legouniverse.wikia.com/wiki/Special:RecentChanges?feed=rss"
+        },
+        {
+            "class": "news",
+            "latestTimeStamp": "2015-11-10 21:26:00",
+            "short": "NPR Tech",
+            "title": "Technology : NPR",
+            "urgency": 2,
+            "url": "http://www.npr.org/templates/rss/podlayer.php?id=1019"
+        },
+        {
+            "class": "news",
+            "latestTimeStamp": "2015-11-11 00:17:12",
+            "short": "US-CERT",
+            "title": "US-CERT Current Activity",
+            "urgency": 0,
+            "url": "https://www.us-cert.gov/ncas/current-activity.xml"
+        },
+        {
+            "class": "tech",
+            "latestTimeStamp": "2015-10-27 01:32:38",
+            "title": "Sysinternals Site Discussion",
+            "urgency": 2,
+            "url": "http://blogs.technet.com/b/sysinternals/rss.aspx"
+        },
+        {
+            "class": "tech",
+            "latestTimeStamp": "2015-10-07 11:00:00",
+            "title": "Rockbox Major Changes",
+            "urgency": 1,
+            "url": "http://rasher.dk/rockbox/majorchanges.php"
+        },
+        {
+            "class": "webcomic",
+            "latestTimeStamp": "2015-11-08 23:24:21",
+            "title": "Capsalot",
+            "urgency": 1,
+            "url": "http://capsalot.thecomicseries.com/rss/"
+        },
+        {
             "class": "webcomic",
             "latestTimeStamp": "2015-11-09 05:00:00",
             "short": "snarl",
             "title": "Snarlbear",
-            "urgency": 1
+            "urgency": 1,
+            "url": "http://snarlbear.com/rss.php"
         },
         {
-            "URL": "http://genlevcreative.thewebcomic.com/rss/",
             "class": "webcomic",
             "latestTimeStamp": "2015-09-30 00:08:43",
             "short": "minecraft comic",
             "title": "Generating Level - Creative Mode Updates",
-            "urgency": 1
+            "urgency": 1,
+            "url": "http://genlevcreative.thewebcomic.com/rss/"
         },
         {
-            "URL": "http://turnerandhercules.thecomicseries.com/rss/",
             "class": "webcomic",
             "latestTimeStamp": "2015-09-06 20:45:02",
             "title": "Turner & Hercules",
-            "urgency": 0
+            "urgency": 0,
+            "url": "http://turnerandhercules.thecomicseries.com/rss/"
         },
         {
-            "URL": "http://feeds.feedburner.com/mclelun",
-            "class": "art",
-            "latestTimeStamp": "2015-09-05 07:14:48",
-            "title": "mclelun",
-            "urgency": 1
-        },
-        {
-            "URL": "http://capsalot.thecomicseries.com/rss/",
-            "class": "webcomic",
-            "latestTimeStamp": "2015-11-08 23:24:21",
-            "title": "Capsalot",
-            "urgency": 1
-        },
-        {
-            "URL": "https://www.us-cert.gov/ncas/current-activity.xml",
-            "class": "news",
-            "latestTimeStamp": "2015-11-09 23:47:26",
-            "short": "US-CERT",
-            "title": "US-CERT Current Activity",
-            "urgency": 0
-        },
-        {
-            "URL": "http://demonroad.thewebcomic.com/rss/",
             "class": "webcomic",
             "latestTimeStamp": "2015-11-03 18:22:49",
             "title": "The Legend Of Zelda: The Demon Road Updates",
-            "urgency": 1
-        },
-        {
-            "URL": "http://blogs.technet.com/b/sysinternals/rss.aspx",
-            "class": "tech",
-            "latestTimeStamp": "2015-10-27 01:32:38",
-            "title": "Sysinternals Site Discussion",
-            "urgency": 2
-        },
-        {
-            "URL": "http://rasher.dk/rockbox/majorchanges.php",
-            "class": "tech",
-            "latestTimeStamp": "2015-10-07 11:00:00",
-            "title": "Rockbox Major Changes",
-            "urgency": 1
-        },
-        {
-            "URL": "http://legouniverse.wikia.com/wiki/Special:RecentChanges?feed=rss",
-            "class": "community",
-            "latestTimeStamp": "2015-11-08 23:19:08",
-            "title": "LEGO Universe Wiki  - Recent changes [en]",
-            "urgency": 1
+            "urgency": 1,
+            "url": "http://demonroad.thewebcomic.com/rss/"
         }
     ],
-    "lastCheck": "2015-11-10 17:15:45",
+    "lastCheck": "2015-11-10 19:04:13",
     "lastDaily": "1970-01-01 00:00:00",
     "lastNotify": "1970-01-01 00:00:00",
     "lastWeekly": "1970-01-01 00:00:00"
