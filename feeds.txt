@@ -4,10 +4,7 @@
     "feeds": [
         {
             "class": "art",
-            "latestTimeStamp": "2015-09-05 07:14:48",
-            "title": "mclelun",
-            "urgency": 1,
-            "url": "http://feeds.feedburner.com/mclelun"
+            "url": "http://www.mclelun.com/feeds/posts/default"
         },
         {
             "class": "blog",
@@ -41,7 +38,7 @@
         },
         {
             "class": "news",
-            "latestTimeStamp": "2015-11-11 00:17:12",
+            "latestTimeStamp": "2015-11-11 16:47:24",
             "short": "US-CERT",
             "title": "US-CERT Current Activity",
             "urgency": 0,
@@ -93,13 +90,13 @@
         },
         {
             "class": "webcomic",
-            "latestTimeStamp": "2015-11-03 18:22:49",
+            "latestTimeStamp": "2015-11-11 18:31:35",
             "title": "The Legend Of Zelda: The Demon Road Updates",
             "urgency": 1,
             "url": "http://demonroad.thewebcomic.com/rss/"
         }
     ],
-    "lastCheck": "2015-11-10 19:04:13",
+    "lastCheck": "2015-11-11 16:41:59",
     "lastDaily": "1970-01-01 00:00:00",
     "lastNotify": "1970-01-01 00:00:00",
     "lastWeekly": "1970-01-01 00:00:00"

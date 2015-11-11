@@ -5,9 +5,6 @@
 		A utility to check RSS feeds. Uses a json file to keep track
 	of last check and feed URLs. You can edit this to add new feeds or remove old ones.
 	
-	TODO: allow program to accept date range as an argument to check for 
-	releases in that range.
-	TODO: add error safety around the JSON file in loadFeeds().
 	TODO: logging to a file
 	try returning a list of dictionarys for each feed with a title, sum, and results string as well as the total number.
 	TODO: let program announce some feeds immediatly, daily, or weekly. Framework in JSON is set up already.
@@ -25,9 +22,8 @@ def main():
 	#for testing
 	#filePath = path.dirname(__file__) + "\\feeds.txt"
 	#feedJSON, parsedFeeds = loadFeeds(filePath)
-	#rewriteTimestamps(feedJSON)
+	#PUT TEST CODE HERE!
 	#saveJSON(filePath, feedJSON)
-	
 	
 	#print total and summaries
 	print(result[1] + result[2])
@@ -56,7 +52,7 @@ def getClass(feedData):
 
 def sortJSONFeedListByClass(feedJSON):
 	return sorted(feedJSON, key=getClass)
-#*** END OF sortFeedListByClass() *********************************************
+#*** END OF sortJSONFeedListByClass() *****************************************
 
 def rewriteTimestamps(feedJSON, newDate="1970-01-01 00:00:00"):
 	#overwrites all the feed timestamps in the .TXT json structure
@@ -65,7 +61,7 @@ def rewriteTimestamps(feedJSON, newDate="1970-01-01 00:00:00"):
 		feedData["latestTimeStamp"] = newDate
 	
 	return feedJSON
-#*** END OF sortFeedListByClass() *********************************************
+#*** END OF rewriteTimestamps() ***********************************************
 
 def loadJSON(filePath):
 	#This function is used to load the .TXT file as a JSON structure
@@ -167,15 +163,15 @@ def checkFeeds(filePath=""):
 	datetimeFormat = "%Y-%m-%d %H:%M:%S"
 	
 	#make sure that you have a path. by default filePath = ""
-	#if filePath is still default, set it to feeds.txt in the program folder
+	#if filePath is still "", set it to feeds.txt in the program's folder
 	if filePath == "":
 		filePath = path.dirname(__file__) + "\\feeds.txt"
 	
 	startDatetime = datetime.now()
 	totalTally = 0
-	heading = "" #contains totalTally
-	fullSummary = "" #contains individual summaries
-	results = [] #results =#contains all the new entry names
+	heading = "" 		#contains totalTally, summary of all feeds
+	fullSummary = ""	#contains individual feed summaries
+	results = [] 		#contains all the new entry names
 
 	#open the JSON file
 	feedJSON, parsedFeeds = loadFeeds(filePath, datetimeFormat)
