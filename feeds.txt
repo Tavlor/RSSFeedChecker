@@ -12,7 +12,7 @@
         },
         {
             "class": "blog",
-            "latestTimeStamp": "2015-11-06 18:35:19",
+            "latestTimeStamp": "2015-11-12 17:24:33",
             "short": "EMSL",
             "title": "Evil Mad Scientist Laboratories",
             "urgency": 1,
@@ -21,7 +21,7 @@
         },
         {
             "class": "blog",
-            "latestTimeStamp": "2015-11-06 12:33:00",
+            "latestTimeStamp": "2015-11-12 12:26:00",
             "title": "Mojang",
             "urgency": 1,
             "url": "http://mojang.com/feed.xml",
@@ -29,9 +29,10 @@
         },
         {
             "class": "community",
-            "latestTimeStamp": "2015-11-11 00:43:44",
+            "latestTimeStamp": "2015-11-12 02:35:45",
             "short": "LU Wiki",
             "title": "LEGO Universe Wiki  - Recent changes [en]",
+            "urgency": 1,
             "url": "http://legouniverse.wikia.com/wiki/Special:RecentChanges?feed=rss",
             "url-home": "http://legouniverse.wikia.com/wiki/LEGO_Universe_Wiki"
         },
@@ -50,8 +51,9 @@
             "short": "US-CERT",
             "title": "US-CERT Current Activity",
             "urgency": 0,
-            "url0": "https://www.us-cert.gov/ncas/current-activity.xml",
-            "url-home": "https://www.us-cert.gov/ncas/current-activity"
+            "url": "",
+            "url-home": "https://www.us-cert.gov/ncas/current-activity",
+            "url0": "https://www.us-cert.gov/ncas/current-activity.xml"
         },
         {
             "class": "tech",
@@ -81,7 +83,7 @@
         },
         {
             "class": "webcomic",
-            "latestTimeStamp": "2015-11-09 05:00:00",
+            "latestTimeStamp": "2015-11-12 05:00:00",
             "short": "snarl",
             "title": "Snarlbear",
             "urgency": 1,
@@ -115,7 +117,7 @@
             "url-home": "http://demonroad.thewebcomic.com/"
         }
     ],
-    "lastCheck": "2015-11-11 19:23:49",
+    "lastCheck": "2015-11-13 08:12:00",
     "lastDaily": "1970-01-01 00:00:00",
     "lastNotify": "1970-01-01 00:00:00",
     "lastWeekly": "1970-01-01 00:00:00"

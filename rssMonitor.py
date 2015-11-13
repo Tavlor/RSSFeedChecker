@@ -97,72 +97,28 @@ def getFeedList(filePath):
 def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
 	#load the .TXT file as a JSON structure. feeds are in a list called "feeds"
 	
-	#the unparsed JSON data
+	#the unparsed JSON data - check it for missing info immediatly
 	newjson = loadJSON(filePath)
+	newjson = JSONDataFaultCheck(newjson)
 	
 	# a list of parsed feeds. Will NOT contain any data from the JSON
 	#contains dictionaries of the parsed feeds and respective timestamps
 	parsedFeeds = []
 	
-	#--- fault detection. make sure you have whay you need. -------------------
-	
-	'''#check that the feeds list exists and that it is indeed a list.
-	if not "feeds" in newjson:
-		logging.warning("feeds missing!")
-		newjson["feeds"] = []
-
-	elif not type(newjson["feeds"]) == list:
-		logging.warning("feeds not of type list!")
-		newjson["feeds"] = []
-	#-----------------------------------------------------------------------<<<
-
-	if not "lastCheck" in newjson:
-		newjson["lastCheck"] = "1970-01-01 00:00:00"
-
-	if not "lastNotify" in newjson:
-		newjson["lastNotify"] = "1970-01-01 00:00:00"
-
-	if not "lastDaily" in newjson:
-		newjson["lastDaily"] = "1970-01-01 00:00:00"
-
-	if not "lastWeekly" in newjson:
-		newjson["lastWeekly"] = "1970-01-01 00:00:00"
-	#--- end of main fault detection. Feed-specific is in following loop. -----'''
-	
-	newjson = JSONDataFaultCheck(newjson)
-	
 	#parse the urls in the json structure as feeds
 	for index, data in enumerate(newjson["feeds"]):
-		#--- feed fault detection ---------------------------------------------
-		#as for now, this is the only check I have to run directly in this loop.
-		if not "url" in data: #check for feed url
-			logging.warning("feed missing URL! INDEX: %i", index)
-			continue #no point in loading it if we don't have a URL
-		'''
-		if not "url-home" in data: #check for home url
-			data["url-home"] = "$$$$$"
-
-		if not "latestTimeStamp" in data: #check for the timestamp
-			data["latestTimeStamp"] = "1970-01-01 00:00:00"
-
-		if not "title" in data: #check for the feed's title
-			data["title"] = ""
-			#"title" will be set later when the feed is parsed.
-
-		if not "class" in data: #check for the feed's class
-			data["class"] = "" 
-
-		if not "urgency" in data: #check for the feed's urgency
-			data["urgency"] = 1
-			#possible urgencies: 0=immediate; 1=daily; 2=weekly
-		#----------------------------------------------------------------------'''
-		data, urlPresent = feedDataFaultCheck(data)#, index)
-		print(index)
-		#if not urlPresent: #parse ONLY if a url was detected
-			#continue
-			#add to list of dictionaries {parsed feeds, timestamps}
-		parsedFeeds.append({"feed":feedparser.parse(data["url"]), \
-			"latestDatetime":datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
+		#check feed data
+		data, urlPresent = feedDataFaultCheck(data, index)
+		
+		if not urlPresent: #parse ONLY if a url was detected
+			parsedFeed = None
+		else:
+			parsedFeed = feedparser.parse(data["url"])
+	
+			#add to list of dictionaries {parsed feed, timestamp}
+		parsedFeeds.append({"feed":parsedFeed, "latestDatetime":\
+			datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
+			
 		data = updateFeedData(data, parsedFeeds[index]["feed"])
 	#--- end of for loop --------------------------------------------------
 
@@ -201,12 +157,12 @@ def JSONDataFaultCheck(JSON):
 #*** END OF JSONDataFaultCheck() **********************************************
 
 
-def feedDataFaultCheck(feedData):#, index):
+def feedDataFaultCheck(feedData, index=-1):
 	#checks each feed's data for missing elements
 	#returns feedData(modified) as well as a boolean which confirms the url
 	urlPresent = True
-	if not "url" in feedData: #check for feed url
-		logging.warning("feed missing URL! INDEX: nan")#%i", index)
+	if not "url" in feedData or feedData["url"] == "": #check for feed url
+		logging.warning("feed missing URL! INDEX: %i", index)
 		feedData["url"] = ""
 		urlPresent = False #no point in loading it if we don't have a URL
 
@@ -234,6 +190,10 @@ def feedDataFaultCheck(feedData):#, index):
 def updateFeedData(feedData, parsedFeed):
 	#updates a few things by pulling from the parsed feed.
 	
+	#check that parsedFeed is not None
+	if parsedFeed is None:
+		return feedData
+		
 	#update the feed title every time
 	feedData["title"] = parsedFeed.feed.title
 	
@@ -254,7 +214,7 @@ def saveJSON(filePath, JSON):
 #*** END OF saveJSON() ********************************************************
 
 
-def checkFeeds(filePath=""):
+def checkFeeds(filePath="", urgency=-1):
 	#--- SETUP ----------------------------------------------------------------
 	#configure the format which time is loaded/saved in.
 	#CAUTION! Changing this might cause issues with parsing the time.
@@ -280,6 +240,10 @@ def checkFeeds(filePath=""):
 
 	#loop through each feed, building a list of new entries
 	for index, pair in enumerate(parsedFeeds):
+		#check that parsedFeeds is not None
+		if pair["feed"] is None:
+			logging.warning("Feed skipped: %i" % index)
+			continue
 		#get the feed's results in a tuple.
 		feedResult = getNewEntries(pair["feed"], pair["latestDatetime"])
 		
