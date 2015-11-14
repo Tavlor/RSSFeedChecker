@@ -12,7 +12,7 @@
         },
         {
             "class": "blog",
-            "latestTimeStamp": "2015-11-12 17:24:33",
+            "latestTimeStamp": "2015-11-13 20:43:57",
             "short": "EMSL",
             "title": "Evil Mad Scientist Laboratories",
             "urgency": 1,
@@ -38,7 +38,7 @@
         },
         {
             "class": "news",
-            "latestTimeStamp": "2015-11-11 21:32:00",
+            "latestTimeStamp": "2015-11-13 09:55:00",
             "short": "NPR Tech",
             "title": "Technology : NPR",
             "urgency": 2,
@@ -47,13 +47,12 @@
         },
         {
             "class": "news",
-            "latestTimeStamp": "2015-11-11 16:47:24",
+            "latestTimeStamp": "2015-11-13 20:16:37",
             "short": "US-CERT",
             "title": "US-CERT Current Activity",
             "urgency": 0,
-            "url": "",
-            "url-home": "https://www.us-cert.gov/ncas/current-activity",
-            "url0": "https://www.us-cert.gov/ncas/current-activity.xml"
+            "url": "https://www.us-cert.gov/ncas/current-activity.xml",
+            "url-home": "https://www.us-cert.gov/ncas/current-activity"
         },
         {
             "class": "tech",
@@ -117,7 +116,7 @@
             "url-home": "http://demonroad.thewebcomic.com/"
         }
     ],
-    "lastCheck": "2015-11-13 08:12:00",
+    "lastCheck": "2015-11-14 17:42:11",
     "lastDaily": "1970-01-01 00:00:00",
     "lastNotify": "1970-01-01 00:00:00",
     "lastWeekly": "1970-01-01 00:00:00"

@@ -98,32 +98,35 @@ def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
 	#load the .TXT file as a JSON structure. feeds are in a list called "feeds"
 	
 	#the unparsed JSON data - check it for missing info immediatly
-	newjson = loadJSON(filePath)
-	newjson = JSONDataFaultCheck(newjson)
+	feedJSON = loadJSON(filePath)
+	feedJSON = JSONDataFaultCheck(feedJSON)
 	
 	# a list of parsed feeds. Will NOT contain any data from the JSON
 	#contains dictionaries of the parsed feeds and respective timestamps
 	parsedFeeds = []
 	
 	#parse the urls in the json structure as feeds
-	for index, data in enumerate(newjson["feeds"]):
-		#check feed data
-		data, urlPresent = feedDataFaultCheck(data, index)
+	for index, feedData in enumerate(feedJSON["feeds"]):
+		#check feedData
+		feedData = feedDataFaultCheck(feedData)
 		
-		if not urlPresent: #parse ONLY if a url was detected
+		#parse the feed - feedparser can accept bad urls
+		parsedFeed = feedparser.parse(feedData["url"])
+		
+		#print(index)
+		if parsedFeed.version == "": #implies invalid feed URL (not a feed)
+			logging.warning("Provided URL is not a feed! INDEX: %i", index)
 			parsedFeed = None
 		else:
-			parsedFeed = feedparser.parse(data["url"])
+			feedData = updateFeedData(feedData, parsedFeed)
 	
-			#add to list of dictionaries {parsed feed, timestamp}
+		#add to list of dictionaries {parsed feed, timestamp}
 		parsedFeeds.append({"feed":parsedFeed, "latestDatetime":\
-			datetime.strptime(data["latestTimeStamp"], datetimeFormat)})
-			
-		data = updateFeedData(data, parsedFeeds[index]["feed"])
-	#--- end of for loop --------------------------------------------------
+			datetime.strptime(feedData["latestTimeStamp"], datetimeFormat)})
+	#--- end of for loop ---------------------------------------------------<<<
 
 	#return a tuple of the json list and the parsed feed list
-	return(newjson, parsedFeeds)
+	return(feedJSON, parsedFeeds)
 #*** END OF loadFeeds() *******************************************************
 
 
@@ -157,17 +160,15 @@ def JSONDataFaultCheck(JSON):
 #*** END OF JSONDataFaultCheck() **********************************************
 
 
-def feedDataFaultCheck(feedData, index=-1):
+def feedDataFaultCheck(feedData):
 	#checks each feed's data for missing elements
-	#returns feedData(modified) as well as a boolean which confirms the url
-	urlPresent = True
-	if not "url" in feedData or feedData["url"] == "": #check for feed url
-		logging.warning("feed missing URL! INDEX: %i", index)
+	#returns feedData(modified)
+	
+	if not "url" in feedData: #check for feed url
 		feedData["url"] = ""
-		urlPresent = False #no point in loading it if we don't have a URL
 
 	if not "url-home" in feedData: #check for home url
-		feedData["url-home"] = "$$$$$"
+		feedData["url-home"] = ""
 
 	if not "latestTimeStamp" in feedData: #check for the timestamp
 		feedData["latestTimeStamp"] = "1970-01-01 00:00:00"
@@ -183,7 +184,7 @@ def feedDataFaultCheck(feedData, index=-1):
 		feedData["urgency"] = 1
 		#possible urgencies: 0=immediate; 1=daily; 2=weekly
 		
-	return feedData, urlPresent
+	return feedData
 #*** END OF feedDataFaultCheck() **********************************************
 
 
@@ -195,10 +196,11 @@ def updateFeedData(feedData, parsedFeed):
 		return feedData
 		
 	#update the feed title every time
-	feedData["title"] = parsedFeed.feed.title
+	if "title" in parsedFeed.feed:
+		feedData["title"] = parsedFeed.feed.title
 	
 	#if a home URL isn't saved, get one from the feed.
-	if feedData["url-home"] == "":
+	if feedData["url-home"] == "" and "link" in parsedFeed.feed:
 		feedData["url-home"] = parsedFeed.feed.link
 	return feedData
 #*** END OF updateFeedData() **************************************************
