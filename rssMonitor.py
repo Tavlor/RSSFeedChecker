@@ -49,7 +49,11 @@ def checkFeeds(filePath="", urgency=-1):
 	#make sure that you have a path. by default filePath = ""
 	#if filePath is still "", set it to feeds.txt in the program's folder
 	if filePath == "":
-		filePath = path.dirname(__file__) + "\\feeds.txt"
+		#filePath = path.dirname(__file__) + "\\feeds.txt"
+		filePath = path.abspath("feeds.txt")
+	else #to ensure that the path is normalized.
+		filePath = path.abspath(filepath)
+	print(filePath + "\n")
 	
 	startDatetime = datetime.now()
 	totalTally = 0
