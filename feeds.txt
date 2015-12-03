@@ -38,7 +38,7 @@
         },
         {
             "class": "news",
-            "latestTimeStamp": "2015-12-02 22:22:00",
+            "latestTimeStamp": "2015-12-03 10:46:00",
             "short": "NPR Tech",
             "title": "Technology : NPR",
             "urgency": 2,
@@ -107,7 +107,7 @@
             "url-home": "http://demonroad.thewebcomic.com/comics/"
         }
     ],
-    "lastCheck": "2015-12-02 21:53:27",
+    "lastCheck": "2015-12-03 09:34:36",
     "lastDaily": "1970-01-01 00:00:00",
     "lastNotify": "1970-01-01 00:00:00",
     "lastWeekly": "1970-01-01 00:00:00"

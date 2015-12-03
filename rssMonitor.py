@@ -66,10 +66,9 @@ def checkFeeds(filePath="", urgency=-1):
 	fullSummary = ""	#contains individual feed summaries
 	results = [] 		#contains all the new entry names
 
-	#open the JSON file
+	#open the JSON file (it can take a few seconds to parse the feeds)
 	feedJSON, parsedFeeds= loadFeeds(filePath, datetimeFormat)
-	#LAG IS HERE~
-	print("feeds.txt loaded")
+	print("data from feeds.txt loaded\n")
 
 	#--- MAIN CODE ------------------------------------------------------------
 	logging.info("Last checked at " + str(feedJSON["lastCheck"]) + \
@@ -77,6 +76,9 @@ def checkFeeds(filePath="", urgency=-1):
 
 	#loop through each feed, building a list of new entries
 	for index, parsedFeed in enumerate(parsedFeeds):
+		print("checking feed %i/%i  "  % \
+			(index + 1,len(feedJSON["feeds"])), end="\r")
+			
 		#check that parsedFeeds is not None
 		if parsedFeed is None:
 			logging.warning("Feed skipped: %i" % index)
@@ -104,6 +106,7 @@ def checkFeeds(filePath="", urgency=-1):
 		feedJSON["feeds"][index]["latestTimeStamp"] = \
 		datetime.strftime(feedResult[3], datetimeFormat)
 
+	print("\nfeeds checked!")
 	#Contextual output! total number of entries effects the main summary
 	if totalTally == 0:
 		heading = "There are no new entries in any of your feeds.\n"
@@ -201,10 +204,14 @@ def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
 	
 	#parse the urls in the json structure as feeds
 	for index, feedData in enumerate(feedJSON["feeds"]):
+		print("parsing feed %i/%i  "  % \
+			(index + 1,len(feedJSON["feeds"])), end="\r")
+		
 		#check feedData
 		feedData = feedDataFaultCheck(feedData)
 		
 		#parse the feed - feedparser can accept bad urls
+		#this step takes a little while.
 		parsedFeed = feedparser.parse(feedData["url"])
 		
 		if parsedFeed.version == "": #implies invalid feed URL (not a feed)
@@ -212,12 +219,10 @@ def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
 			parsedFeed = None
 		else: #update the data stored in the JSON file from the parsed feed
 			feedData = updateFeedData(feedData, parsedFeed)
-	
-		'''#add to list of dictionaries {parsed feed, timestamp}
-		parsedFeeds.append({"feed":parsedFeed, "latestDatetime":\
-			datetime.strptime(feedData["latestTimeStamp"], datetimeFormat)})'''
+
 		parsedFeeds.append(parsedFeed)
 	#--- end of for loop ---------------------------------------------------<<<
+	print("\nfeeds parsed!")
 
 	#return a tuple of the json list and the parsed feed list
 	return(feedJSON, parsedFeeds)
