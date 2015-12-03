@@ -8,6 +8,11 @@
 
 	NOTE: In the code, keeping the parsed JSON and the parsed feeds separate
 		makes saving the JSON data MUCH easier.
+		
+	NOTE: DO NOT USE "lastCheck" FOR TIMESTAMP COMPARRISONS!!! You don't know
+		what time zone the feed comes from. It is better to compare it with
+		it's own timestamps (also, you cannot push back "lastCheck" because it
+		gets reset to the current time at each run)
 
 	TODO: logging to a file
 	TODO: try returning a list of dictionarys for each feed with a title, sum,
@@ -21,6 +26,7 @@ from datetime import datetime
 from os import path
 
 def main():
+	print("Starting up\n")
 	decorative =	"=-=-=-=-=-=-=-=-=-=\n"
 	
 	result = checkFeeds()
@@ -51,9 +57,8 @@ def checkFeeds(filePath="", urgency=-1):
 	if filePath == "":
 		#filePath = path.dirname(__file__) + "\\feeds.txt"
 		filePath = path.abspath("feeds.txt")
-	else #to ensure that the path is normalized.
+	else: #to ensure that the path is normalized.
 		filePath = path.abspath(filepath)
-	print(filePath + "\n")
 	
 	startDatetime = datetime.now()
 	totalTally = 0
@@ -62,21 +67,29 @@ def checkFeeds(filePath="", urgency=-1):
 	results = [] 		#contains all the new entry names
 
 	#open the JSON file
-	feedJSON, parsedFeeds = loadFeeds(filePath, datetimeFormat)
+	feedJSON, parsedFeeds= loadFeeds(filePath, datetimeFormat)
+	#LAG IS HERE~
+	print("feeds.txt loaded")
 
 	#--- MAIN CODE ------------------------------------------------------------
 	logging.info("Last checked at " + str(feedJSON["lastCheck"]) + \
 	",\nnow checking at " + str(startDatetime))
 
 	#loop through each feed, building a list of new entries
-	for index, pair in enumerate(parsedFeeds):
+	for index, parsedFeed in enumerate(parsedFeeds):
 		#check that parsedFeeds is not None
-		if pair["feed"] is None:
+		if parsedFeed is None:
 			logging.warning("Feed skipped: %i" % index)
 			continue
-		#get the feed's results in a tuple.
-		feedResult = getNewEntries(pair["feed"], pair["latestDatetime"])
 		
+		#get the target timestamp for this feed
+		feedTargetTimestamp = datetime.strptime(\
+			feedJSON["feeds"][index]["latestTimeStamp"], datetimeFormat)
+		
+		#get the feed's results in a tuple.
+		feedResult = getNewEntries(parsedFeed, feedTargetTimestamp)
+		
+		#--- CLERICAL CODE ----------------------------------------------------
 		#update totalTally
 		totalTally = totalTally + feedResult[0]
 
@@ -87,37 +100,38 @@ def checkFeeds(filePath="", urgency=-1):
 		#add the summary piece to fullSummary
 		fullSummary = fullSummary + feedResult[2]
 
-		#store the PublishDate of the latest entry so we have it next time
+		#store the PublishDate of the newest entry so we have it for next time
 		feedJSON["feeds"][index]["latestTimeStamp"] = \
 		datetime.strftime(feedResult[3], datetimeFormat)
 
-		#Contextual output! total number of entries effects the main summary
-		if totalTally == 0:
-			heading = "There are no new entries in any of your feeds.\n"
-		elif totalTally == 1:
-			heading = "There is 1 new entry in all your feeds.\n"
-		else:
-			heading = "There are " + str(totalTally) + \
-				" new entries in all your feeds.\n"
+	#Contextual output! total number of entries effects the main summary
+	if totalTally == 0:
+		heading = "There are no new entries in any of your feeds.\n"
+	elif totalTally == 1:
+		heading = "There is 1 new entry in all your feeds.\n"
+	else:
+		heading = "There are " + str(totalTally) + \
+			" new entries in all your feeds.\n"
 
-	#save the new check time in the JSON structure, then save the JSON.
+	#save the time we started in the JSON structure
 	feedJSON["lastCheck"] = datetime.strftime(startDatetime, datetimeFormat)
-	
+	#and then save the JSON structure
 	saveJSON(filePath, feedJSON)
 		
 	return (totalTally, heading, fullSummary, results)
 #*** END OF checkFeeds() ******************************************************
 
 
-def getNewEntries(feed, lastDatetime, firstDatetime = 0):
-	#requires a feed object and a datetime to compare, returns a tuple containing
-	#the number of new elements, a string of text representing those elements
-	#and a summary string.
+def getNewEntries(feed, targetDatetime):
+	#accepts a feed object and a datetime object to compare, returns a tuple
+	#containing the number of new elements, a string of text representing those
+	#elements and a summary string.
 
 	#--- SETUP ----------------------------------------------------------------
-	#get the most recent timestamp, will be returned.
-	latestTimeStamp = \
+	#get the feed's most recent timestamp, will be returned.
+	feedLatestTimeStamp = \
 	datetime.fromtimestamp(time.mktime(feed.entries[0].updated_parsed))
+	#note that I convert 'time_struct' to 'datetime'
 	
 	#keep track of the number of new entries
 	counter = 0
@@ -125,16 +139,19 @@ def getNewEntries(feed, lastDatetime, firstDatetime = 0):
 	#holds the text output of this function.
 	feedSummary = ""
 	feedText = feed.feed.title + "\n"
-	
+
 	#--- MAIN CODE ------------------------------------------------------------
 	logging.info("Checking " + feed.feed.title)
 	
 	#Go through entries until you hit an old one.
 	for entry in feed.entries:
-		#feedparser parses time as 'time_struct', we need datetime
-		feedDatetime = datetime.fromtimestamp(time.mktime(entry.updated_parsed))
+		#get the entry's timestamp
+		entryTimeStamp = entry.updated_parsed
+		#feedparser parses time as 'time_struct', convert to 'datetime'
+		entryDatetime = datetime.fromtimestamp(time.mktime(entryTimeStamp))
+		
 		#Check to see if entry is new.
-		if feedDatetime > lastDatetime:
+		if entryDatetime > targetDatetime:
 			feedText = feedText + entry.title + "\n"
 			counter = counter + 1
 		else:
@@ -154,7 +171,7 @@ def getNewEntries(feed, lastDatetime, firstDatetime = 0):
 	feedText = feedText
 	
 	#return count, the two strings, and the most recent timestamp in a tuple
-	return (counter, feedText, feedSummary, latestTimeStamp)
+	return (counter, feedText, feedSummary, feedLatestTimeStamp)
 #*** END OF getNewEntries() ***************************************************
 
 
@@ -179,8 +196,7 @@ def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
 	feedJSON = loadJSON(filePath)
 	feedJSON = JSONDataFaultCheck(feedJSON)
 	
-	# a list of parsed feeds. Will NOT contain any data from the JSON
-	#contains dictionaries of the parsed feeds and respective timestamps
+	#a list of parsed feeds. Will NOT contain any data from the JSON
 	parsedFeeds = []
 	
 	#parse the urls in the json structure as feeds
@@ -191,16 +207,16 @@ def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
 		#parse the feed - feedparser can accept bad urls
 		parsedFeed = feedparser.parse(feedData["url"])
 		
-		#print(index)
 		if parsedFeed.version == "": #implies invalid feed URL (not a feed)
 			logging.warning("Provided URL is not a feed! INDEX: %i", index)
 			parsedFeed = None
-		else:
+		else: #update the data stored in the JSON file from the parsed feed
 			feedData = updateFeedData(feedData, parsedFeed)
 	
-		#add to list of dictionaries {parsed feed, timestamp}
+		'''#add to list of dictionaries {parsed feed, timestamp}
 		parsedFeeds.append({"feed":parsedFeed, "latestDatetime":\
-			datetime.strptime(feedData["latestTimeStamp"], datetimeFormat)})
+			datetime.strptime(feedData["latestTimeStamp"], datetimeFormat)})'''
+		parsedFeeds.append(parsedFeed)
 	#--- end of for loop ---------------------------------------------------<<<
 
 	#return a tuple of the json list and the parsed feed list
@@ -219,6 +235,7 @@ def saveJSON(filePath, JSON):
 
 
 #--- GETTING DATA ----------------------------------------------------------<<<
+
 def getFeedListString(filePath, title=True, url=True, checktime=False):
 	result = ""
 	for item in getFeedList(filePath):
@@ -240,8 +257,7 @@ def getClass(feedData):
 
 def getFeedList(filePath):
 	#doesn't return actual feed dictionary - just the JSON stuff
-	feedJSON = loadJSON(filePath)
-	return feedJSON["feeds"]
+	return loadJSON(filePath)["feeds"]
 #*** END OF getFeedList() *****************************************************
 
 
