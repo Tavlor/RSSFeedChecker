@@ -11,8 +11,7 @@
 		
 	NOTE: DO NOT USE "lastCheck" FOR TIMESTAMP COMPARRISONS!!! You don't know
 		what time zone the feed comes from. It is better to compare it with
-		it's own timestamps (also, you cannot push back "lastCheck" because it
-		gets reset to the current time at each run)
+		it's own timestamps.
 
 	TODO: logging to a file
 	TODO: try returning a list of dictionarys for each feed with a title, sum,
@@ -55,10 +54,9 @@ def checkFeeds(filePath="", urgency=-1):
 	#make sure that you have a path. by default filePath = ""
 	#if filePath is still "", set it to feeds.txt in the program's folder
 	if filePath == "":
-		#filePath = path.dirname(__file__) + "\\feeds.txt"
-		filePath = path.abspath("feeds.txt")
-	else: #to ensure that the path is normalized.
-		filePath = path.abspath(filepath)
+		filePath = path.dirname(path.realpath(__file__)) + "/feeds.txt"
+	#ensure that the path is normalized.
+	filePath = path.abspath(filePath)
 	
 	startDatetime = datetime.now()
 	totalTally = 0
@@ -67,7 +65,7 @@ def checkFeeds(filePath="", urgency=-1):
 	results = [] 		#contains all the new entry names
 
 	#open the JSON file (it can take a few seconds to parse the feeds)
-	feedJSON, parsedFeeds= loadFeeds(filePath, datetimeFormat)
+	feedJSON, parsedFeeds = loadFeeds(filePath, datetimeFormat)
 	print("data from feeds.txt loaded\n")
 
 	#--- MAIN CODE ------------------------------------------------------------
