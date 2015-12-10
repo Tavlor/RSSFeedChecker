@@ -18,6 +18,7 @@
 		and results string as well as the total number.
 	TODO: let program announce some feeds immediatly, daily, or weekly.
 		Framework in JSON is set up already.
+	TODO: Add a timer when loading the feeds from the internet - 10s or so
 '''
 
 import feedparser, time, json, logging
@@ -127,19 +128,24 @@ def getNewEntries(feed, targetDatetime):
 	#accepts a feed object and a datetime object to compare, returns a tuple
 	#containing the number of new elements, a string of text representing those
 	#elements and a summary string.
-
-	#--- SETUP ----------------------------------------------------------------
-	#get the feed's most recent timestamp, will be returned.
-	feedLatestTimeStamp = \
-	datetime.fromtimestamp(time.mktime(feed.entries[0].updated_parsed))
-	#note that I convert 'time_struct' to 'datetime'
 	
+	#--- SETUP ----------------------------------------------------------------
 	#keep track of the number of new entries
 	counter = 0
 	
 	#holds the text output of this function.
 	feedSummary = ""
 	feedText = feed.feed.title + "\n"
+	
+	#check that entries exist really quick.
+	if len(feed.entries) == 0:
+		#No entries. I've run into this once. Not good for code.
+		return (counter, feedText, feedSummary, targetDatetime)
+		
+	#get the feed's most recent timestamp, will be returned.
+	feedLatestTimeStamp = \
+	datetime.fromtimestamp(time.mktime(feed.entries[0].updated_parsed))
+	#note that I convert 'time_struct' to 'datetime'
 
 	#--- MAIN CODE ------------------------------------------------------------
 	logging.info("Checking " + feed.feed.title)
