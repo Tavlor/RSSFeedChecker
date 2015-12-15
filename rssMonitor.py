@@ -24,7 +24,7 @@ from datetime import datetime
 from os import path
 
 def main():
-	decorative =	"=-=-=-=-=-=-=-=-=-=\n"
+	decorative = "=-=-=-=-=-=-=-=-=-=-=-=-=\n"
 	
 	logging.basicConfig(filename='rssMonitor.log', level = logging.DEBUG)
 	logging.info("Starting up")
@@ -42,6 +42,24 @@ def main():
 		print(decorative + string)
 	logging.info("all processes finished! \n" + decorative)
 #*** END OF MAIN **************************************************************
+
+
+def scheduledCheck():
+	#call this method when running a regular check.
+	decorative = "=-=-^-=-=\n"
+	
+	logging.basicConfig(filename='rssMonitor.log', level = logging.WARNING)
+	logging.warning("Starting up at " + str(datetime.now()))
+	
+	result = checkFeeds()
+	if(result[0] == 0):
+		#no new feeds. Return nothing.
+		return ""
+	
+	finalString = (result[1] + result[2])
+	for string in result[3]:
+		finalString = finalString + decorative + string
+#*** END OF scheduledCheck() **************************************************
 
 
 def checkFeeds(filePath="", urgency=-1):
@@ -108,8 +126,7 @@ def checkFeeds(filePath="", urgency=-1):
 	elif totalTally == 1:
 		heading = "There is 1 new entry in all your feeds.\n"
 	else:
-		heading = "There are " + str(totalTally) + \
-			" new entries in all your feeds.\n"
+		heading = "There are %i new entries in all your feeds.\n" % totalTally
 
 	#save the time we started in the JSON structure
 	feedJSON["lastCheck"] = datetime.strftime(startDatetime, datetimeFormat)
@@ -155,6 +172,7 @@ def getNewEntries(feed, targetDatetime):
 		
 		#Check to see if entry is new.
 		if entryDatetime > targetDatetime:
+			#if so, add the entry to the end of the main list.
 			entryList = entryList + entry.title + "\n"
 			counter = counter + 1
 		else:
@@ -165,11 +183,9 @@ def getNewEntries(feed, targetDatetime):
 		#don't return anything if nothing is new
 		pass
 	elif counter == 1:
-		feedSummary = " } " + str(counter) + " new entry in " + \
-		feed.feed.title + ".\n"
+		feedSummary = " > 1 new entry in %s.\n" %feed.feed.title
 	else:
-		feedSummary = " } " + str(counter) + " new entries in " + \
-		feed.feed.title + ".\n"
+		feedSummary = " > %i new entries in %s.\n" %(counter, feed.feed.title)
 
 	#return count, the two strings, and the most recent timestamp in a tuple
 	return (counter, feedSummary, entryList, feedLatestTimeStamp)
@@ -209,7 +225,7 @@ def loadJSON(filePath):
 		try:
 			newjson = json.load(store)
 		except ValueError:
-			logging.warning("Invalid json file!")
+			logging.error("Invalid json file! Loading fake JSON")
 			newjson = json.loads(defaultJSON)
 	return newjson
 #*** END OF loadJSON() ********************************************************
@@ -227,7 +243,7 @@ def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
 	
 	#parse the urls in the json structure as feeds
 	for index, feedData in enumerate(feedJSON["feeds"]):
-		print("parsing feed %i/%i  "  % \
+		print("parsing feed %i/%i  "  %\
 			(index + 1,len(feedJSON["feeds"])), end="\r")
 		
 		#check feedData
@@ -238,14 +254,14 @@ def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
 		parsedFeed = feedparser.parse(feedData["url"])
 		
 		if parsedFeed.version == "": #implies invalid feed URL (not a feed)
-			logging.warning("Provided URL is not a feed! INDEX: %i", index)
+			logging.warning("Target URL is not a feed! INDEX: %i" % index)
 			parsedFeed = None
 		else: #update the data stored in the JSON file from the parsed feed
 			feedData = updateFeedData(feedData, parsedFeed)
 
 		parsedFeeds.append(parsedFeed)
 	#--- end of for loop ---------------------------------------------------<<<
-	logging.info("%i feeds parsed!" % len(feedJSON["feeds"]))
+	logging.info("%i feeds parsed!" %len(feedJSON["feeds"]))
 
 	#return a tuple of the json list and the parsed feed list
 	return(feedJSON, parsedFeeds)
@@ -296,11 +312,11 @@ def JSONDataFaultCheck(JSON):
 	
 	#check that the feeds list exists and that it is indeed a list.
 	if not "feeds" in JSON:
-		logging.warning("feeds missing!")
+		logging.warning("'feeds' missing from feeds.txt!")
 		JSON["feeds"] = []
 
 	elif not type(JSON["feeds"]) == list:
-		logging.warning("feeds not of type list!")
+		logging.warning("'feeds' not of type list!")
 		JSON["feeds"] = []
 	#--------------------------------------------------------------------------
 
