@@ -89,6 +89,10 @@
             "url": "http://genlevcreative.thewebcomic.com/rss/",
             "url-home": "http://genlevcreative.smackjeeves.com/"
         },
+	{
+	"class": "webcomic",
+	"url": "http://sssscomic.com/ssss-feed.xml"
+	},
         {
             "class": "webcomic",
             "latestTimeStamp": "2015-12-12 19:12:22",

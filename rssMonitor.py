@@ -12,6 +12,8 @@
 	NOTE: DO NOT USE "lastCheck" FOR TIMESTAMP COMPARRISONS!!! You don't know
 		what time zone the feed comes from. It is better to compare it with
 		it's own timestamps.
+	
+	NOTE: put [chcp 65001] into CMD (sans brackets) to enter Unicode Mode
 
 	TODO: try returning a list of dictionarys [feed : (sum, results string) as
 		well as the total number.
@@ -27,10 +29,10 @@ def main():
 	decorative = "=-=-=-=-=-=-=-=-=-=-=-=-=\n"
 	
 	logging.basicConfig(filename='rssMonitor.log', level = logging.DEBUG)
-	logging.info("Starting up")
+	logging.info(decorative + "\nStarting up")
 	
 	#use this if you need to go back a bit.
-	#revertFeedDates("2015-12-9 00:00:00")
+	#revertFeedDates("2015-12-19 00:00:00")
 	
 	result = checkFeeds()
 	
@@ -40,7 +42,7 @@ def main():
 	#print results
 	for string in result[3]:
 		print(decorative + string)
-	logging.info("all processes finished! \n" + decorative)
+	logging.info("all processes finished!")
 #*** END OF MAIN **************************************************************
 
 
@@ -137,7 +139,7 @@ def checkFeeds(filePath="", urgency=-1):
 #*** END OF checkFeeds() ******************************************************
 
 
-def getNewEntries(feed, targetDatetime):
+def getNewEntries(parsedFeed, targetDatetime):
 	#accepts a feed object and a datetime object to compare, returns a tuple
 	#containing the number of new elements, a string of text representing those
 	#elements and a summary string.
@@ -148,23 +150,23 @@ def getNewEntries(feed, targetDatetime):
 	
 	#holds the text output of this function.
 	feedSummary = ""
-	entryList = feed.feed.title + "\n"
+	entryList = parsedFeed.feed.title + "\n"
 	
 	#check that entries exist really quick.
-	if len(feed.entries) == 0:
+	if len(parsedFeed.entries) == 0:
 		#No entries. I've run into this once. Not good for code.
 		return (counter, feedSummary, entryList, targetDatetime)
 		
 	#get the feed's most recent timestamp, will be returned.
 	feedLatestTimeStamp = \
-	datetime.fromtimestamp(time.mktime(feed.entries[0].updated_parsed))
+	datetime.fromtimestamp(time.mktime(parsedFeed.entries[0].updated_parsed))
 	#note that I convert 'time_struct' to 'datetime'
 
 	#--- MAIN CODE ------------------------------------------------------------
-	logging.debug("Checking " + feed.feed.title)
+	logging.debug("Checking " + parsedFeed.feed.title)
 	
 	#Go through entries until you hit an old one.
-	for entry in feed.entries:
+	for entry in parsedFeed.entries:
 		#get the entry's timestamp
 		entryTimeStamp = entry.updated_parsed
 		#feedparser parses time as 'time_struct', convert to 'datetime'
@@ -183,9 +185,9 @@ def getNewEntries(feed, targetDatetime):
 		#don't return anything if nothing is new
 		pass
 	elif counter == 1:
-		feedSummary = " > 1 new entry in %s.\n" %feed.feed.title
+		feedSummary = " > 1 new entry in %s.\n" % parsedFeed.feed.title
 	else:
-		feedSummary = " > %i new entries in %s.\n" %(counter, feed.feed.title)
+		feedSummary = " > %i new entries in %s.\n" %(counter, parsedFeed.feed.title)
 
 	#return count, the two strings, and the most recent timestamp in a tuple
 	return (counter, feedSummary, entryList, feedLatestTimeStamp)
@@ -306,6 +308,9 @@ def getFeedList(filePath):
 
 
 #--- ORGANIZING/CHECKING DATA ----------------------------------------------<<<
+def ParsedFeedFaultCheck(feed):
+	#TODO: Check feeds for missing info
+	pass
 def JSONDataFaultCheck(JSON):
 	#check for just the main JSON stuff (last time run, ect)
 	#Feed-specific data is checked in feedDataFaultCheck
