@@ -1,10 +1,11 @@
 {
-    "ADDNOTE": "Only the feed URL is needed to function, the other details will be added.",
-    "DATENOTE": "Format in ISO (YYYY-MM-DD), time is 24h",
-    "feeds": [
+    "1ADDNOTE": "Only the feed URL is needed to function, the other details will be added.",
+    "1DATENOTE": "Format in ISO (YYYY-MM-DD), time is 24h",
+    "1IGNORENOTE": "If a feed's class is 'ignore', it won't be dealt with.",
+    "feedsToCheck": [
         {
             "class": "art",
-            "latestTimeStamp": "2015-12-11 07:06:54",
+            "latestTimeStamp": "2016-01-23 13:12:53",
             "title": "mclelun",
             "urgency": 1,
             "url": "http://www.mclelun.com/feeds/posts/default",
@@ -12,7 +13,7 @@
         },
         {
             "class": "blog",
-            "latestTimeStamp": "2015-12-07 23:15:20",
+            "latestTimeStamp": "2016-02-03 00:35:06",
             "short": "EMSL",
             "title": "Evil Mad Scientist Laboratories",
             "urgency": 1,
@@ -20,16 +21,8 @@
             "url-home": "http://www.evilmadscientist.com"
         },
         {
-            "class": "blog",
-            "latestTimeStamp": "2015-12-09 14:47:00",
-            "title": "Mojang",
-            "urgency": 1,
-            "url": "http://mojang.com/feed.xml",
-            "url-home": "https://mojang.com/"
-        },
-        {
             "class": "community",
-            "latestTimeStamp": "2015-12-10 18:51:24",
+            "latestTimeStamp": "2016-01-29 05:22:41",
             "short": "LU Wiki",
             "title": "LEGO Universe Wiki  - Recent changes [en]",
             "urgency": 1,
@@ -38,7 +31,7 @@
         },
         {
             "class": "news",
-            "latestTimeStamp": "2015-12-12 12:51:00",
+            "latestTimeStamp": "2016-02-03 22:07:00",
             "short": "NPR Tech",
             "title": "Technology : NPR",
             "urgency": 2,
@@ -47,7 +40,7 @@
         },
         {
             "class": "news",
-            "latestTimeStamp": "2015-12-12 04:30:55",
+            "latestTimeStamp": "2016-02-02 21:46:59",
             "short": "US-CERT",
             "title": "US-CERT Current Activity",
             "urgency": 0,
@@ -56,7 +49,7 @@
         },
         {
             "class": "tech",
-            "latestTimeStamp": "2015-10-27 01:32:38",
+            "latestTimeStamp": "2016-02-02 22:50:41",
             "short": "sysinternals",
             "title": "Sysinternals Site Discussion",
             "urgency": 2,
@@ -65,7 +58,7 @@
         },
         {
             "class": "tech",
-            "latestTimeStamp": "2015-10-07 11:00:00",
+            "latestTimeStamp": "2016-01-21 11:00:00",
             "short": "rockbox",
             "title": "Rockbox Major Changes",
             "urgency": 1,
@@ -74,7 +67,7 @@
         },
         {
             "class": "webcomic",
-            "latestTimeStamp": "2015-12-06 02:50:22",
+            "latestTimeStamp": "2016-01-28 16:53:05",
             "title": "Capsalot",
             "urgency": 1,
             "url": "http://capsalot.thecomicseries.com/rss/",
@@ -89,10 +82,6 @@
             "url": "http://genlevcreative.thewebcomic.com/rss/",
             "url-home": "http://genlevcreative.smackjeeves.com/"
         },
-	{
-	"class": "webcomic",
-	"url": "http://sssscomic.com/ssss-feed.xml"
-	},
         {
             "class": "webcomic",
             "latestTimeStamp": "2015-12-12 19:12:22",
@@ -103,7 +92,7 @@
         },
         {
             "class": "webcomic",
-            "latestTimeStamp": "2015-12-01 23:09:33",
+            "latestTimeStamp": "2016-01-28 01:58:54",
             "short": "demon road",
             "title": "The Legend Of Zelda: The Demon Road Updates",
             "urgency": 1,
@@ -111,7 +100,7 @@
             "url-home": "http://demonroad.thewebcomic.com/comics/"
         }
     ],
-    "lastCheck": "2015-12-12 16:59:07",
+    "lastCheck": "2016-02-03 20:34:51",
     "lastDaily": "1970-01-01 00:00:00",
     "lastNotify": "1970-01-01 00:00:00",
     "lastWeekly": "1970-01-01 00:00:00"
