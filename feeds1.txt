@@ -1,5 +1,5 @@
 {
-    "1ADDNOTE": "Only the feed URL is needed to function, the other details will be added."
+    "1ADDNOTE": "Only the feed URL is needed to function, the other details will be added.",
     "1DATENOTE": "Format in ISO (YYYY-MM-DD), time is 24h",
     "1IGNORENOTE": "If a feed's class is 'ignore', it won't be dealt with.",
     "feedsToCheck": [
