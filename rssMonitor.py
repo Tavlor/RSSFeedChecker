@@ -32,7 +32,7 @@ def main():
 	logging.info(decorative + "\nStarting up")
 	
 	#use this if you need to go back a bit.
-	revertFeedDates("2016-01-19 00:00:00")
+	#revertFeedDates("2016-01-19 00:00:00")
 	
 	result = checkFeeds()
 	
@@ -200,7 +200,6 @@ def getNewEntries(parsedFeed, targetDatetime):
 	else:
 		feedSummary = " > %i new entries in %s.\n" %(counter, parsedFeed.feed.title)
 	
-	logging.debug("\tDone with " + parsedFeed.feed.title)
 	#return count, the two strings, and the most recent timestamp in a tuple
 	return (counter, feedSummary, entryList, feedLatestTimeStamp)
 #*** END OF getNewEntries() ***************************************************
