@@ -19,9 +19,10 @@
 		well as the total number.
 	TODO: Add a timer when loading the feeds from the internet - 10s or so
 	TODO: Add a date & time next to each entry when printing?
+	TODO: Add exceptions
 '''
 
-import feedparser, time, json, logging
+import feedparser, time, json, logging, sys
 from datetime import datetime
 from os import path
 
@@ -83,9 +84,12 @@ def checkFeeds(filePath="", urgency=-1):
 	fullSummary = ""	#contains individual feed summaries
 	results = [] 		#contains all the new entry names
 
-	#open the JSON file (it can take a few seconds to parse the feeds)
-	feedJSON, parsedFeeds = loadFeeds(filePath, datetimeFormat)
-
+	try:
+		#open the JSON file (it can take a few seconds to parse the feeds)
+		feedJSON, parsedFeeds = loadFeeds(filePath, datetimeFormat)
+	except: ValueError
+		print("error in system - should print specific error")
+		sys.exit()
 	#--- MAIN CODE ------------------------------------------------------------
 	logging.info("Last checked at " + str(feedJSON["lastCheck"]) + \
 	",\nnow checking at " + str(startDatetime))
@@ -235,13 +239,16 @@ def loadJSON(filePath):
 	#This function is used to load the feeds.TXT file as a JSON structure
 	#the following line is a JSON structure which is loaded in the case of an error. Very basic.
 	defaultJSON = '{"feedsToCheck":[], "lastCheck":"1970-01-01 00:00:00", "1ERROR":"!defaultJSON used!"}'
-
+	
+	#write another try/catch: FileNotFoundError
 	with open(filePath, 'r') as store:
 		try:
 			loadedJSON = json.load(store)
 		except ValueError:
-			logging.error("Invalid json file! Loading fake JSON; Check your JSON!")
-			loadedJSON = json.loads(defaultJSON)
+			#throw another error. TODO: throw different errors if JSON is invalid or file is missing
+			raise RuntimeError("Failed to load JSON from .txt file!")
+			#logging.error("Invalid json file! Loading fake JSON; Check your JSON!")
+			#loadedJSON = json.loads(defaultJSON)
 	return loadedJSON
 #*** END OF loadJSON() ********************************************************
 
@@ -328,11 +335,13 @@ def JSONDataFaultCheck(JSON):
 	#check that the feeds list exists and that it is indeed a list.
 	if not "feedsToCheck" in JSON:
 		logging.warning("'feedsToCheck' missing from feeds.txt!")
-		JSON["feedsToCheck"] = []
+		raise ValueError("No list of feeds to check!")
+		#JSON["feedsToCheck"] = []
 
 	elif not type(JSON["feedsToCheck"]) == list:
 		logging.warning("'feedsToCheck' not of type list!")
-		JSON["feedsToCheck"] = []
+		raise ValueError("THe list of feeds to check is not a list!")
+		#JSON["feedsToCheck"] = []
 	#--------------------------------------------------------------------------
 
 	if not "lastCheck" in JSON: #last time a check was run

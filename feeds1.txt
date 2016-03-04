@@ -1,11 +1,11 @@
 {
-    "1ADDNOTE": "Only the feed URL is needed to function, the other details will be added."
+    "1ADDNOTE": "Only the feed URL is needed to function, the other details will be added.",
     "1DATENOTE": "Format in ISO (YYYY-MM-DD), time is 24h",
     "1IGNORENOTE": "If a feed's class is 'ignore', it won't be dealt with.",
     "feedsToCheck": [
         {
             "class": "art",
-            "latestTimeStamp": "2016-02-27 08:50:11",
+            "latestTimeStamp": "2016-01-23 13:12:53",
             "title": "mclelun",
             "urgency": 1,
             "url": "http://www.mclelun.com/feeds/posts/default",
@@ -13,7 +13,7 @@
         },
         {
             "class": "blog",
-            "latestTimeStamp": "2016-03-03 16:38:31",
+            "latestTimeStamp": "2016-02-03 00:35:06",
             "short": "EMSL",
             "title": "Evil Mad Scientist Laboratories",
             "urgency": 1,
@@ -22,7 +22,7 @@
         },
         {
             "class": "community",
-            "latestTimeStamp": "2016-03-02 20:54:01",
+            "latestTimeStamp": "2016-01-29 05:22:41",
             "short": "LU Wiki",
             "title": "LEGO Universe Wiki  - Recent changes [en]",
             "urgency": 1,
@@ -31,7 +31,7 @@
         },
         {
             "class": "news",
-            "latestTimeStamp": "2016-03-01 23:40:00",
+            "latestTimeStamp": "2016-02-03 22:07:00",
             "short": "NPR Tech",
             "title": "Technology : NPR",
             "urgency": 2,
@@ -40,7 +40,7 @@
         },
         {
             "class": "news",
-            "latestTimeStamp": "2016-03-03 01:31:48",
+            "latestTimeStamp": "2016-02-02 21:46:59",
             "short": "US-CERT",
             "title": "US-CERT Current Activity",
             "urgency": 0,
@@ -92,7 +92,7 @@
         },
         {
             "class": "webcomic",
-            "latestTimeStamp": "2016-02-23 18:32:46",
+            "latestTimeStamp": "2016-01-28 01:58:54",
             "short": "demon road",
             "title": "The Legend Of Zelda: The Demon Road Updates",
             "urgency": 1,
@@ -100,7 +100,7 @@
             "url-home": "http://demonroad.thewebcomic.com/comics/"
         }
     ],
-    "lastCheck": "2016-03-03 14:08:55",
+    "lastCheck": "2016-02-03 20:34:51",
     "lastDaily": "1970-01-01 00:00:00",
     "lastNotify": "1970-01-01 00:00:00",
     "lastWeekly": "1970-01-01 00:00:00"
