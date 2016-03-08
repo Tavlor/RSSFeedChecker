@@ -2,7 +2,7 @@
     "1ADDNOTE": "Only the feed URL is needed to function, the other details will be added.",
     "1DATENOTE": "Format in ISO (YYYY-MM-DD), time is 24h",
     "1IGNORENOTE": "If a feed's class is 'ignore', it won't be dealt with. TODO",
-    "feedsToCheck": [
+    "feedList": [
         {
             "class": "art",
             "latestEntryTitle": "Lets Paint Yellow Flower Tree In Anime Style",
@@ -53,8 +53,8 @@
         },
         {
             "class": "news",
-            "latestEntryTitle": "Microsoft Releases March 2016 Security Bulletin",
-            "latestTimeStamp": "2016-03-08 18:28:26",
+            "latestEntryTitle": "Mozilla Releases Security Updates",
+            "latestTimeStamp": "2016-03-08 19:55:07",
             "short": "US-CERT",
             "title": "US-CERT Current Activity",
             "urgency": 0,
@@ -111,8 +111,8 @@
         },
         {
             "class": "webcomic",
-            "latestEntryTitle": "Comic \u00bb CH2 PG26",
-            "latestTimeStamp": "2016-02-23 18:32:46",
+            "latestEntryTitle": "Comic \u00bb CH2 PG27",
+            "latestTimeStamp": "2016-03-08 21:19:01",
             "short": "demon road",
             "title": "The Legend Of Zelda: The Demon Road Updates",
             "urgency": 1,
@@ -120,7 +120,7 @@
             "url-home": "http://demonroad.thewebcomic.com/comics/"
         }
     ],
-    "lastCheck": "2016-03-08 14:14:54",
+    "lastCheck": "2016-03-08 15:48:45",
     "lastDaily": "1970-01-01 00:00:00",
     "lastNotify": "1970-01-01 00:00:00",
     "lastWeekly": "1970-01-01 00:00:00"

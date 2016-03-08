@@ -3,11 +3,23 @@
 	Author: Taylor Smith
 	Comment: 
 		A utility to check RSS feeds. Uses a json file (feeds.txt) to keep
-		track of last check and feed URLs. You can edit the json to add new
+		track of last check and feed URLs. You can edit the txt file to add new
 		feeds or remove old ones.
-
-	NOTE: In the code, keeping the parsed JSON and the parsed feeds separate
-		makes saving the JSON data MUCH easier.
+	
+	NAMING CONVENTIONS:
+		feedJSON: the dictionary of data about feeds & some metadata stored in
+			the feeds.txt file.
+		feedList: the list of feed data in feedJSON, accessable at 
+			feedJSON["feedList"]
+		feedData: one of the dictionarys in feedList, accessable at
+			feedJSON["feedList"][index]
+		parsedFeeds: the list of parsed feeds returned fom feedparser.
+		parsedFeed: data from a single parsed feed, accessable at 
+			parsedFeeds[index]. index is the same between feedData and 
+			parsedFeed.
+		
+	NOTE: In the code, keeping the parsed JSON and the parsed feeds in separate
+		structures makes saving the JSON data MUCH easier.
 		
 	NOTE: DO NOT USE "lastCheck" FOR TIMESTAMP COMPARRISONS!!! You don't know
 		what time zone the feed comes from. It is better to compare it with
@@ -19,7 +31,6 @@
 		well as the total number.
 	TODO: Add a timer when loading the feeds from the internet - 10s or so
 	TODO: Add a date & time next to each entry when printing?
-	TODO: Add exceptions
 '''
 
 import feedparser, time, json, logging, sys
@@ -105,16 +116,20 @@ def checkFeeds(filePath="", urgency=-1):
 	#loop through each feed, building a list of new entries
 	for index, parsedFeed in enumerate(parsedFeeds):
 		print("checking feed %i/%i  "  % \
-			(index + 1,len(feedJSON["feedsToCheck"])), end="\r")
+			(index + 1,len(feedJSON["feedList"])), end="\r")
 			
 		#check that parsedFeeds is not None
 		if parsedFeed is None:
 			logging.warning("Feed skipped: %i" % index)
 			continue
 		
+		#with feedList, I can only modify objects in its array, not the array
+		#itself. This makes code more readable.
+		feedList = feedJSON["feedList"]
+		
 		#get the previous timestamp for this feed
 		feedPastDatetime = datetime.strptime(\
-			feedJSON["feedsToCheck"][index]["latestTimeStamp"], datetimeFormat)
+			feedList[index]["latestTimeStamp"], datetimeFormat)
 		
 		try:
 			#get the feed's results in a tuple.
@@ -122,12 +137,12 @@ def checkFeeds(filePath="", urgency=-1):
 			feedResult = getNewEntries(parsedFeed, feedPastDatetime)
 		except TypeError:
 			logging.error("Feed [%i]:[%s] probably has an invalid URL." % \
-			(index, feedJSON["feedsToCheck"][index]["url"]) )
+			(index, feedData[index]["url"]) )
 		except ValueError:
 			logging.error("Feed [%i] has no entries (code doesn't handle that \
 			well" % index)
 		else:
-			#--- CLERICAL CODE - Can't run if try fails! --------------------------
+			#--- CLERICAL CODE - Can't run if try fails! ----------------------
 			#update totalTally
 			totalTally = totalTally + feedResult[0]
 
@@ -136,11 +151,11 @@ def checkFeeds(filePath="", urgency=-1):
 				fullSummary = fullSummary + feedResult[1]#string
 				results.append(feedResult[2])#list
 
-			#store the PublishDate of the newest entry so we have it for next time
-			feedJSON["feedsToCheck"][index]["latestTimeStamp"] = \
+			#store the PublishDate of the newest entry so we have it next time
+			feedJSON["feedList"][index]["latestTimeStamp"] = \
 			datetime.strftime(feedResult[3], datetimeFormat)
 			#also store the title of the newest entry
-			feedJSON["feedsToCheck"][index]["latestEntryTitle"] = \
+			feedJSON["feedList"][index]["latestEntryTitle"] = \
 			parsedFeed.entries[0].title
 			
 	#--- END OF LOOP ----------------------------------------------------------
@@ -156,7 +171,7 @@ def checkFeeds(filePath="", urgency=-1):
 	#save the time we started in the JSON structure
 	feedJSON["lastCheck"] = datetime.strftime(startDatetime, datetimeFormat)
 	#and then save the JSON structure
-	saveJSON(filePath, feedJSON)
+	saveFeedJSON(filePath, feedJSON)
 		
 	return (totalTally, heading, fullSummary, results)
 #*** END OF checkFeeds() ******************************************************
@@ -250,28 +265,13 @@ def revertFeedDates(newDate="1970-01-01 00:00:00",filePath=""):
 	logging.info("timestamps reverted to %s." % newDate)
 
 	#save the JSON structure
-	saveJSON(filePath, feedJSON)
+	saveFeedJSON(filePath, feedJSON)
 #*** END OF checkFeeds() ******************************************************
 
-#--- LOADING/SAVING DATA ---------------------------------------------------<<<
-def loadJSON(filePath):
-	#This function is used to load the feeds.TXT file as a JSON structure.
-	#It will throw an error if it cannot load the file.
-	
-	#write another try/catch: FileNotFoundError
-	try:
-		with open(filePath, 'r') as store:
-			loadedJSON = json.load(store)
-	except FileNotFoundError:
-		raise RuntimeError("Couldn't find feeds.txt!")
-	except ValueError as error:
-		raise RuntimeError("Bad JSON: %s" % str(error))
-	return loadedJSON
-#*** END OF loadJSON() ********************************************************
-
-
+#>>> LOADING/SAVING DATA <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
-	#load the .TXT file as a JSON structure. feeds are in a list called "feeds"
+	#load the .TXT file as a JSON structure into feedJSON, then parses the 
+	#feeds via feedparser into parsedFeeds. Returns a tuple.
 	
 	#the unparsed JSON data - check it for missing info immediatly
 	feedJSON = loadJSON(filePath)
@@ -281,15 +281,16 @@ def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
 	parsedFeeds = []
 	
 	#parse the urls in the json structure as feeds
-	for index, feedData in enumerate(feedJSON["feedsToCheck"]):
+	for index, feedData in enumerate(feedJSON["feedList"]):
 		#print a progress counter. It overwrites itself as the count goes up.
+		#I'm kinda proud of this one. :)
 		print("parsing feed %i/%i  "  %\
-			(index + 1,len(feedJSON["feedsToCheck"])), end="\r")
+			(index + 1,len(feedJSON["feedList"])), end="\r")
 		
-		#check feedData
+		#check feedData for missing info (ie. the URL) before parseing the feed
 		feedData = feedDataFaultCheck(feedData)
 		
-		#parse the feed - feedparser can handle bad urls
+		#parse the feed - feedparser can handle bad urls, it 
 		#this step takes a little while.
 		parsedFeed = feedparser.parse(feedData["url"])
 		
@@ -302,25 +303,42 @@ def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
 			feedData = updateFeedData(feedData, parsedFeed)
 
 		parsedFeeds.append(parsedFeed)
-	#--- end of for loop ---------------------------------------------------<<<
-	logging.info("%i feeds parsed!" %len(feedJSON["feedsToCheck"]))
+	#--- END OF FOR LOOP ------------------------------------------------------
+	logging.info("%i feeds parsed!" %len(feedJSON["feedList"]))
 
 	#return a tuple of the json list and the parsed feed list
 	return(feedJSON, parsedFeeds)
 #*** END OF loadFeeds() *******************************************************
 
 
-def saveJSON(filePath, JSON):
-	#dumps list "JSON" into a .TXT as a json structure
+def loadJSON(filePath):
+	#This function is used to load the feeds.TXT file as a JSON structure.
+	#It will throw an error if it cannot load the file.
+	
+	#write another try/catch: FileNotFoundError
+	try:
+		with open(filePath, 'r') as store:
+			feedJSON = json.load(store)
+	except FileNotFoundError:
+		raise RuntimeError("Couldn't find feeds.txt!")
+	except ValueError as error:
+		raise RuntimeError("Bad JSON: %s" % str(error))
+	else:
+		return feedJSON
+#*** END OF loadJSON() ********************************************************
+
+
+def saveFeedJSON(filePath, feedJSON):
+	#dumps feedJSON into a .TXT as a json structure
 	
 	#sort the list of feed data by class (may comment out as needed)
-	#JSON["feedsToCheck"] = sortJSONFeedListByClass(JSON["feedsToCheck"])
+	#feedJSON["feedList"] = sortJSONFeedListByClass(feedJSON["feedList"])
 	with open(filePath, 'w') as store:
-		json.dump(JSON,store, sort_keys=True, indent=4, separators=(',', ': '))
-#*** END OF saveJSON() ********************************************************
+		json.dump(feedJSON,store, sort_keys=True, indent=4, separators=(',', ': '))
+#*** END OF saveFeedJSON() ********************************************************
 
 
-#--- GETTING DATA ----------------------------------------------------------<<<
+#>>> GETTING DATA <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 def getFeedListString(filePath, title=True, url=True, checktime=False):
 	result = ""
@@ -336,45 +354,48 @@ def getFeedListString(filePath, title=True, url=True, checktime=False):
 #*** END OF getFeedListString() ***********************************************
 
 
-def getClass(feedData):
+def getFeedClass(feedData):
 	return feedData["class"]
-#*** END OF getClass() ********************************************************
+#*** END OF getFeedClass() ****************************************************
 
+def getFeedTitle(feedData):
+	return feedData["title"]
+#*** END OF getFeedTitle() ****************************************************
 
 def getFeedList(filePath):
-	#doesn't return actual feed dictionary - just the JSON stuff
-	return loadJSON(filePath)["feedsToCheck"]
+	#doesn't return all of feedJSON - just feedList
+	return loadJSON(filePath)["feedList"]
 #*** END OF getFeedList() *****************************************************
 
 
-#--- ORGANIZING/CHECKING DATA ----------------------------------------------<<<
-def JSONDataFaultCheck(JSON):
+#>>> ORGANIZING/CHECKING DATA <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+def JSONDataFaultCheck(feedJSON):
 	#check for just the main JSON stuff (last time run, ect)
 	#Feed-specific data is checked in feedDataFaultCheck
 	
 	#check that the feeds list exists and that it is indeed a list.
-	if not "feedsToCheck" in JSON:
-		logging.warning("'feedsToCheck' missing from feeds.txt!")
+	if not "feedList" in feedJSON:
+		logging.warning("'feedList' missing from feeds.txt!")
 		raise RuntimeError("No list of feeds to check!")
 
-	elif not type(JSON["feedsToCheck"]) == list:
-		logging.warning("'feedsToCheck' not of type list!")
-		raise RuntimeError("Bad JSON: the list of feeds to check is not a list!")
+	elif not type(feedJSON["feedList"]) == list:
+		logging.warning("'feedList' is not of type list!")
+		raise RuntimeError("Bad feedJSON: the list of feeds to check is not a list!")
 	#--------------------------------------------------------------------------
 
-	if not "lastCheck" in JSON: #last time a check was run
-		JSON["lastCheck"] = "1970-01-01 00:00:00"
+	if not "lastCheck" in feedJSON: #last time a check was run
+		feedJSON["lastCheck"] = "1970-01-01 00:00:00"
 
-	if not "lastNotify" in JSON: #last time a notification was sent
-		JSON["lastNotify"] = "1970-01-01 00:00:00"
+	if not "lastNotify" in feedJSON: #last time a notification was sent
+		feedJSON["lastNotify"] = "1970-01-01 00:00:00"
 
-	if not "lastDaily" in JSON: #last time a daily notification was sent
-		JSON["lastDaily"] = "1970-01-01 00:00:00"
+	if not "lastDaily" in feedJSON: #last time a daily notification was sent
+		feedJSON["lastDaily"] = "1970-01-01 00:00:00"
 
-	if not "lastWeekly" in JSON: #last time a weekly notification was sent
-		JSON["lastWeekly"] = "1970-01-01 00:00:00"
+	if not "lastWeekly" in feedJSON: #last time a weekly notification was sent
+		feedJSON["lastWeekly"] = "1970-01-01 00:00:00"
 		
-	return JSON
+	return feedJSON
 #*** END OF JSONDataFaultCheck() **********************************************
 
 
@@ -411,14 +432,14 @@ def feedDataFaultCheck(feedData):
 
 
 def sortJSONFeedListByClass(feedJSON):
-	return sorted(feedJSON, key=getClass)
+	return sorted(feedJSON, key=getFeedClass)
 #*** END OF sortJSONFeedListByClass() *****************************************
 
 
 def rewriteTimestamps(feedJSON, newDate="1970-01-01 00:00:00"):
 	#overwrites all the feed timestamps in the .TXT json structure
 	#handy if you've been testing and missed an update
-	for feedData in feedJSON["feedsToCheck"]:
+	for feedData in feedJSON["feedList"]:
 		feedData["latestTimeStamp"] = newDate
 		#overwriting is ok because the code will always store the feed's latest
 		#timestamp even if it's older than the current "latestTimeStamp", i. e.
@@ -429,7 +450,7 @@ def rewriteTimestamps(feedJSON, newDate="1970-01-01 00:00:00"):
 
 def updateFeedData(feedData, parsedFeed):
 	#updates a few things by pulling from the parsed feed.
-	#assumes that these are present in parsedFeed.
+	#assumes that these items are present in parsedFeed.
 	#might add a try-except to protect against needless crashes
 
 	#update the feed title every time
