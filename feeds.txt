@@ -1,11 +1,12 @@
 {
-    "1ADDNOTE": "Only the feed URL is needed to function, the other details will be added."
+    "1ADDNOTE": "Only the feed URL is needed to function, the other details will be added.",
     "1DATENOTE": "Format in ISO (YYYY-MM-DD), time is 24h",
-    "1IGNORENOTE": "If a feed's class is 'ignore', it won't be dealt with.",
+    "1IGNORENOTE": "If a feed's class is 'ignore', it won't be dealt with. TODO",
     "feedsToCheck": [
         {
             "class": "art",
-            "latestTimeStamp": "2016-02-27 08:50:11",
+            "latestEntryTitle": "Lets Paint Yellow Flower Tree In Anime Style",
+            "latestTimeStamp": "2016-03-07 13:17:58",
             "title": "mclelun",
             "urgency": 1,
             "url": "http://www.mclelun.com/feeds/posts/default",
@@ -13,7 +14,8 @@
         },
         {
             "class": "blog",
-            "latestTimeStamp": "2016-03-03 16:38:31",
+            "latestEntryTitle": "Make Vol. 50",
+            "latestTimeStamp": "2016-03-08 01:23:03",
             "short": "EMSL",
             "title": "Evil Mad Scientist Laboratories",
             "urgency": 1,
@@ -21,8 +23,18 @@
             "url-home": "http://www.evilmadscientist.com"
         },
         {
+            "class": "blog",
+            "latestEntryTitle": "Where in the world is MINECON?",
+            "latestTimeStamp": "2016-03-07 15:39:00",
+            "title": "Mojang",
+            "urgency": 1,
+            "url": "https://mojang.com/feed.xml",
+            "url-home": "https://mojang.com/"
+        },
+        {
             "class": "community",
-            "latestTimeStamp": "2016-03-02 20:54:01",
+            "latestEntryTitle": "User:Apostolov.1999",
+            "latestTimeStamp": "2016-03-08 14:54:55",
             "short": "LU Wiki",
             "title": "LEGO Universe Wiki  - Recent changes [en]",
             "urgency": 1,
@@ -31,7 +43,8 @@
         },
         {
             "class": "news",
-            "latestTimeStamp": "2016-03-01 23:40:00",
+            "latestEntryTitle": "How A Foiled Robbery Sheds Light On Apple's Clash With The FBI",
+            "latestTimeStamp": "2016-03-08 18:44:00",
             "short": "NPR Tech",
             "title": "Technology : NPR",
             "urgency": 2,
@@ -40,7 +53,8 @@
         },
         {
             "class": "news",
-            "latestTimeStamp": "2016-03-03 01:31:48",
+            "latestEntryTitle": "Microsoft Releases March 2016 Security Bulletin",
+            "latestTimeStamp": "2016-03-08 18:28:26",
             "short": "US-CERT",
             "title": "US-CERT Current Activity",
             "urgency": 0,
@@ -49,6 +63,7 @@
         },
         {
             "class": "tech",
+            "latestEntryTitle": "Update: Sigcheck v2.5, Process Explorer v16.11, Whois v1.13, RAMMap v1.5",
             "latestTimeStamp": "2016-02-02 22:50:41",
             "short": "sysinternals",
             "title": "Sysinternals Site Discussion",
@@ -58,6 +73,7 @@
         },
         {
             "class": "tech",
+            "latestEntryTitle": "Extended battery life on the Fuze V2, Clip V2, ...",
             "latestTimeStamp": "2016-01-21 11:00:00",
             "short": "rockbox",
             "title": "Rockbox Major Changes",
@@ -67,6 +83,7 @@
         },
         {
             "class": "webcomic",
+            "latestEntryTitle": "9",
             "latestTimeStamp": "2016-01-28 16:53:05",
             "title": "Capsalot",
             "urgency": 1,
@@ -75,6 +92,7 @@
         },
         {
             "class": "webcomic",
+            "latestEntryTitle": "Comic \u00bb Breeding",
             "latestTimeStamp": "2015-09-30 00:08:43",
             "short": "minecraft comic",
             "title": "Generating Level - Creative Mode Updates",
@@ -84,6 +102,7 @@
         },
         {
             "class": "webcomic",
+            "latestEntryTitle": "Episode 104 - Page 27",
             "latestTimeStamp": "2015-12-12 19:12:22",
             "title": "Turner & Hercules",
             "urgency": 1,
@@ -92,6 +111,7 @@
         },
         {
             "class": "webcomic",
+            "latestEntryTitle": "Comic \u00bb CH2 PG26",
             "latestTimeStamp": "2016-02-23 18:32:46",
             "short": "demon road",
             "title": "The Legend Of Zelda: The Demon Road Updates",
@@ -100,7 +120,7 @@
             "url-home": "http://demonroad.thewebcomic.com/comics/"
         }
     ],
-    "lastCheck": "2016-03-03 14:08:55",
+    "lastCheck": "2016-03-08 14:14:54",
     "lastDaily": "1970-01-01 00:00:00",
     "lastNotify": "1970-01-01 00:00:00",
     "lastWeekly": "1970-01-01 00:00:00"

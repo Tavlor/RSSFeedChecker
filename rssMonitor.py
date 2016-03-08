@@ -35,14 +35,19 @@ def main():
 	#use this if you need to go back a bit.
 	#revertFeedDates("2016-01-19 00:00:00")
 	
-	result = checkFeeds()
-	
-	#print total and summaries
-	print(result[1] + result[2])
-	
-	#print results
-	for string in result[3]:
-		print(decorative + string)
+	try:
+		result = checkFeeds()
+	except RuntimeError as error:
+		print("\nFatal Error: %s" % error)
+		logging.critical("Fatal Error: %s" % error)
+	else:
+		#print total and summaries
+		print(result[1] + result[2])
+		
+		#print results
+		for string in result[3]:
+			print(decorative + string)
+
 	logging.info("all processes finished!")
 #*** END OF MAIN **************************************************************
 
@@ -54,18 +59,25 @@ def scheduledCheck():
 	logging.basicConfig(filename='rssMonitor.log', level = logging.WARNING)
 	logging.warning("Starting up at " + str(datetime.now()))
 	
-	result = checkFeeds()
-	if(result[0] == 0):
-		#no new feeds. Return nothing.
-		return ""
-	
-	finalString = (result[1] + result[2])
-	for string in result[3]:
-		finalString = finalString + decorative + string
+	try:
+		result = checkFeeds()
+	except RuntimeError as error:
+		return ("Fatal Error: %s" % error)
+		logging.critical("Fatal Error: %s" % error)
+	else:
+		if(result[0] == 0):
+			#no new feeds. Return nothing.
+			return ""
+		
+		finalString = (result[1] + result[2])
+		for string in result[3]:
+			finalString = finalString + decorative + string
 #*** END OF scheduledCheck() **************************************************
 
 
 def checkFeeds(filePath="", urgency=-1):
+	#you are responsible for catching thrown errors.
+	#checkFeeds should only throw RuntimeError's
 	#--- SETUP ----------------------------------------------------------------
 	#configure the format which time is loaded/saved in.
 	#CAUTION! Changing this might cause issues with parsing the time.
@@ -84,12 +96,8 @@ def checkFeeds(filePath="", urgency=-1):
 	fullSummary = ""	#contains individual feed summaries
 	results = [] 		#contains all the new entry names
 
-	try:
-		#open the JSON file (it can take a few seconds to parse the feeds)
-		feedJSON, parsedFeeds = loadFeeds(filePath, datetimeFormat)
-	except: ValueError
-		print("error in system - should print specific error")
-		sys.exit()
+	#open the JSON file (it can take a few seconds to parse the feeds)
+	feedJSON, parsedFeeds = loadFeeds(filePath, datetimeFormat)
 	#--- MAIN CODE ------------------------------------------------------------
 	logging.info("Last checked at " + str(feedJSON["lastCheck"]) + \
 	",\nnow checking at " + str(startDatetime))
@@ -104,26 +112,37 @@ def checkFeeds(filePath="", urgency=-1):
 			logging.warning("Feed skipped: %i" % index)
 			continue
 		
-		#get the target timestamp for this feed
-		feedTargetTimestamp = datetime.strptime(\
+		#get the previous timestamp for this feed
+		feedPastDatetime = datetime.strptime(\
 			feedJSON["feedsToCheck"][index]["latestTimeStamp"], datetimeFormat)
 		
-		#get the feed's results in a tuple.
-		#([0]counter, [1]feedSummary, [2]entryList, [3]feedLatestTimeStamp)
-		feedResult = getNewEntries(parsedFeed, feedTargetTimestamp)
-		
-		#--- CLERICAL CODE ----------------------------------------------------
-		#update totalTally
-		totalTally = totalTally + feedResult[0]
+		try:
+			#get the feed's results in a tuple.
+			#([0]counter, [1]feedSummary, [2]entryList, [3]feedLatestTimeStamp)
+			feedResult = getNewEntries(parsedFeed, feedPastDatetime)
+		except TypeError:
+			logging.error("Feed [%i]:[%s] probably has an invalid URL." % \
+			(index, feedJSON["feedsToCheck"][index]["url"]) )
+		except ValueError:
+			logging.error("Feed [%i] has no entries (code doesn't handle that \
+			well" % index)
+		else:
+			#--- CLERICAL CODE - Can't run if try fails! --------------------------
+			#update totalTally
+			totalTally = totalTally + feedResult[0]
 
-		#if there were new items detected, add to summary and results.
-		if feedResult[0] > 0:
-			fullSummary = fullSummary + feedResult[1]#string
-			results.append(feedResult[2])#list
+			#if there were new items detected, add to summary and results.
+			if feedResult[0] > 0:
+				fullSummary = fullSummary + feedResult[1]#string
+				results.append(feedResult[2])#list
 
-		#store the PublishDate of the newest entry so we have it for next time
-		feedJSON["feedsToCheck"][index]["latestTimeStamp"] = \
-		datetime.strftime(feedResult[3], datetimeFormat)
+			#store the PublishDate of the newest entry so we have it for next time
+			feedJSON["feedsToCheck"][index]["latestTimeStamp"] = \
+			datetime.strftime(feedResult[3], datetimeFormat)
+			#also store the title of the newest entry
+			feedJSON["feedsToCheck"][index]["latestEntryTitle"] = \
+			parsedFeed.entries[0].title
+			
 	#--- END OF LOOP ----------------------------------------------------------
 		
 	#Contextual output! total number of entries effects the main summary
@@ -143,10 +162,14 @@ def checkFeeds(filePath="", urgency=-1):
 #*** END OF checkFeeds() ******************************************************
 
 
-def getNewEntries(parsedFeed, targetDatetime):
+def getNewEntries(parsedFeed, pastDatetime):
 	#accepts a feed object and a datetime object to compare, returns a tuple
 	#containing the number of new elements, a string of text representing those
 	#elements and a summary string.
+	
+	#quick, check that the feed is valid first!
+	if parsedFeed.version == "": #implies invalid feed URL (not a feed)
+		raise TypeError("parsedFeed is not a feed!")
 	
 	#--- SETUP ----------------------------------------------------------------
 	#keep track of the number of new entries
@@ -159,20 +182,16 @@ def getNewEntries(parsedFeed, targetDatetime):
 	#check that entries exist really quick.
 	if len(parsedFeed.entries) == 0:
 		#No entries. I've run into this once. Not good for code.
-		return (counter, feedSummary, entryList, targetDatetime)
+		raise ValueError("no entries in the feed!")
 		
 	#get the feed's most recent timestamp, will be returned.
 	tempUpdateTime = ""
-	#sometimes feeds don't use 'updated_parsed'. This Try helps.
-	try:
-		tempUpdateTime = parsedFeed.entries[0].updated_parsed
-	except AttributeError:
-		logging.warning("'updated_parsed' doesn't exist for Feed: %s\n\t \
-			Using 'published_parsed' instead" % parsedFeed.feed.title)
-		tempUpdateTime = parsedFeed.entries[0].published_parsed
 	
-	feedLatestTimeStamp = \
-	datetime.fromtimestamp(time.mktime(tempUpdateTime))
+	#sometimes feeds don't put a date/time with entries. I should store the
+	#last entry name too to check with in place of a missing date
+	tempUpdateTime = parsedFeed.entries[0].updated_parsed
+	
+	feedNewDatetime = datetime.fromtimestamp(time.mktime(tempUpdateTime))
 	#note that I convert 'time_struct' to 'datetime'
 
 	#--- MAIN CODE ------------------------------------------------------------
@@ -188,7 +207,7 @@ def getNewEntries(parsedFeed, targetDatetime):
 		entryDatetime = datetime.fromtimestamp(time.mktime(entryTimeStamp))
 		
 		#Check to see if entry is new.
-		if entryDatetime > targetDatetime:
+		if entryDatetime > pastDatetime:
 			#if so, add the entry to the end of the main list.
 			entryList = entryList + entry.title + "\n"
 			counter = counter + 1
@@ -205,7 +224,7 @@ def getNewEntries(parsedFeed, targetDatetime):
 		feedSummary = " > %i new entries in %s.\n" %(counter, parsedFeed.feed.title)
 	
 	#return count, the two strings, and the most recent timestamp in a tuple
-	return (counter, feedSummary, entryList, feedLatestTimeStamp)
+	return (counter, feedSummary, entryList, feedNewDatetime)
 #*** END OF getNewEntries() ***************************************************
 
 
@@ -236,19 +255,17 @@ def revertFeedDates(newDate="1970-01-01 00:00:00",filePath=""):
 
 #--- LOADING/SAVING DATA ---------------------------------------------------<<<
 def loadJSON(filePath):
-	#This function is used to load the feeds.TXT file as a JSON structure
-	#the following line is a JSON structure which is loaded in the case of an error. Very basic.
-	defaultJSON = '{"feedsToCheck":[], "lastCheck":"1970-01-01 00:00:00", "1ERROR":"!defaultJSON used!"}'
+	#This function is used to load the feeds.TXT file as a JSON structure.
+	#It will throw an error if it cannot load the file.
 	
 	#write another try/catch: FileNotFoundError
-	with open(filePath, 'r') as store:
-		try:
+	try:
+		with open(filePath, 'r') as store:
 			loadedJSON = json.load(store)
-		except ValueError:
-			#throw another error. TODO: throw different errors if JSON is invalid or file is missing
-			raise RuntimeError("Failed to load JSON from .txt file!")
-			#logging.error("Invalid json file! Loading fake JSON; Check your JSON!")
-			#loadedJSON = json.loads(defaultJSON)
+	except FileNotFoundError:
+		raise RuntimeError("Couldn't find feeds.txt!")
+	except ValueError as error:
+		raise RuntimeError("Bad JSON: %s" % str(error))
 	return loadedJSON
 #*** END OF loadJSON() ********************************************************
 
@@ -265,19 +282,22 @@ def loadFeeds(filePath, datetimeFormat="%Y-%m-%d %H:%M:%S"):
 	
 	#parse the urls in the json structure as feeds
 	for index, feedData in enumerate(feedJSON["feedsToCheck"]):
+		#print a progress counter. It overwrites itself as the count goes up.
 		print("parsing feed %i/%i  "  %\
 			(index + 1,len(feedJSON["feedsToCheck"])), end="\r")
 		
 		#check feedData
 		feedData = feedDataFaultCheck(feedData)
 		
-		#parse the feed - feedparser can accept bad urls
+		#parse the feed - feedparser can handle bad urls
 		#this step takes a little while.
 		parsedFeed = feedparser.parse(feedData["url"])
 		
 		if parsedFeed.version == "": #implies invalid feed URL (not a feed)
+			#the following includes index and the url.
 			logging.warning("Target URL is not a feed! INDEX: %i\n\t%s" % (index,feedData["url"]))
-			parsedFeed = None
+			#not the time for an error. This is checked again in "getNewEntries()"
+			#raise RuntimeError("[%s] is not an actual feed." % feedData["url"])
 		else: #update the data stored in the JSON file from the parsed feed
 			feedData = updateFeedData(feedData, parsedFeed)
 
@@ -335,13 +355,11 @@ def JSONDataFaultCheck(JSON):
 	#check that the feeds list exists and that it is indeed a list.
 	if not "feedsToCheck" in JSON:
 		logging.warning("'feedsToCheck' missing from feeds.txt!")
-		raise ValueError("No list of feeds to check!")
-		#JSON["feedsToCheck"] = []
+		raise RuntimeError("No list of feeds to check!")
 
 	elif not type(JSON["feedsToCheck"]) == list:
 		logging.warning("'feedsToCheck' not of type list!")
-		raise ValueError("THe list of feeds to check is not a list!")
-		#JSON["feedsToCheck"] = []
+		raise RuntimeError("Bad JSON: the list of feeds to check is not a list!")
 	#--------------------------------------------------------------------------
 
 	if not "lastCheck" in JSON: #last time a check was run
@@ -361,7 +379,7 @@ def JSONDataFaultCheck(JSON):
 
 
 def feedDataFaultCheck(feedData):
-	#checks each feed's data for missing elements
+	#checks each feed's data for missing elements and adds them if needed.
 	#returns feedData(modified)
 	
 	if not "url" in feedData: #check for feed url
@@ -370,8 +388,11 @@ def feedDataFaultCheck(feedData):
 	if not "url-home" in feedData: #check for home url
 		feedData["url-home"] = ""
 
-	if not "latestTimeStamp" in feedData: #check for the timestamp
+	if not "latestTimeStamp" in feedData: #check for the last timestamp
 		feedData["latestTimeStamp"] = "1970-01-01 00:00:00"
+	
+	if not "latestEntryTitle" in feedData: #check for the last entry title
+		feedData["latestEntryTitle"] = ""
 
 	if not "title" in feedData: #check for the feed's title
 		feedData["title"] = ""
@@ -383,6 +404,7 @@ def feedDataFaultCheck(feedData):
 	if not "urgency" in feedData: #check for the feed's urgency
 		feedData["urgency"] = 1
 		#possible urgencies: 0=immediate; 1=daily; 2=weekly
+		#not yet implemented...
 		
 	return feedData
 #*** END OF feedDataFaultCheck() **********************************************
@@ -407,11 +429,9 @@ def rewriteTimestamps(feedJSON, newDate="1970-01-01 00:00:00"):
 
 def updateFeedData(feedData, parsedFeed):
 	#updates a few things by pulling from the parsed feed.
-	
-	#check that parsedFeed is not None
-	if parsedFeed is None:
-		return feedData
-		
+	#assumes that these are present in parsedFeed.
+	#might add a try-except to protect against needless crashes
+
 	#update the feed title every time
 	if "title" in parsedFeed.feed:
 		feedData["title"] = parsedFeed.feed.title
