@@ -43,8 +43,8 @@
         },
         {
             "class": "news",
-            "latestEntryTitle": "How A Foiled Robbery Sheds Light On Apple's Clash With The FBI",
-            "latestTimeStamp": "2016-03-08 18:44:00",
+            "latestEntryTitle": "How Google's Neural Network Hopes To Beat A 'Go' World Champion",
+            "latestTimeStamp": "2016-03-08 20:10:00",
             "short": "NPR Tech",
             "title": "Technology : NPR",
             "urgency": 2,
@@ -53,8 +53,8 @@
         },
         {
             "class": "news",
-            "latestEntryTitle": "Mozilla Releases Security Updates",
-            "latestTimeStamp": "2016-03-08 19:55:07",
+            "latestEntryTitle": "Google Releases Security Update for Chrome",
+            "latestTimeStamp": "2016-03-09 00:23:42",
             "short": "US-CERT",
             "title": "US-CERT Current Activity",
             "urgency": 0,
@@ -80,6 +80,14 @@
             "urgency": 1,
             "url": "http://rasher.dk/rockbox/majorchanges.php",
             "url-home": "http://www.rockbox.org/twiki/bin/view/Main/MajorChanges"
+        },
+        {
+            "class": "",
+            "latestEntryTitle": "SSSS page 487",
+            "title": "Stand Still. Stay Silent - Webcomic feed",
+            "urgency": 1,
+            "url": "http://sssscomic.com/ssss-feed.xml",
+            "url-home": "http://www.sssscomic.com"
         },
         {
             "class": "webcomic",
@@ -120,7 +128,7 @@
             "url-home": "http://demonroad.thewebcomic.com/comics/"
         }
     ],
-    "lastCheck": "2016-03-08 15:48:45",
+    "lastCheck": "2016-03-08 20:05:09",
     "lastDaily": "1970-01-01 00:00:00",
     "lastNotify": "1970-01-01 00:00:00",
     "lastWeekly": "1970-01-01 00:00:00"
