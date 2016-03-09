@@ -82,7 +82,7 @@
             "url-home": "http://www.rockbox.org/twiki/bin/view/Main/MajorChanges"
         },
         {
-            "class": "",
+            "class": "webcomic",
             "latestEntryTitle": "SSSS page 487",
             "title": "Stand Still. Stay Silent - Webcomic feed",
             "urgency": 1,

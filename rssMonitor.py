@@ -47,7 +47,7 @@ def main():
 	logging.info(decorative + "\nStarting up")
 	
 	#use this if you need to go back a bit.
-	revertFeedDates("2016-03-01 00:00:00")
+	#revertFeedDates("2016-03-01 00:00:00")
 	
 	try:
 		result = checkFeeds()
@@ -154,8 +154,9 @@ def checkFeeds(filePath="", entryCap=0, urgency=-1):
 			#store the timestamp for next time.
 			feedList[index]["latestTimeStamp"] = newTimestamp
 		except AttributeError:
-			#if there's no attribute "updated_parsed", don't bother.
-			pass
+			#if there's no attribute "updated_parsed", delete "latestTimeStamp"
+			#if it exists (if it doesn't, None is returned by pop.)
+			feedList[index].pop("latestTimeStamp",None)
 		
 		#also store the title of the newest entry
 		feedList[index]["latestEntryTitle"] = \
