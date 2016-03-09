@@ -29,8 +29,6 @@
 
 	TODO: Add a timer when loading the feeds from the internet - 10s or so
 	TODO: Add a date & time next to each entry when printing?
-	TODO: sometimes feeds don't put a date/time with entries. I should store
-		the last entry name too to check with in place of a missing date.
 	TODO: Create custom errors
 	TODO: use a function to protect from attribute errors when getting things
 		from a parsed feed
@@ -46,8 +44,9 @@ def main():
 	logging.basicConfig(filename='rssMonitor.log', level = logging.DEBUG)
 	logging.info(decorative + "\nStarting up")
 	
-	#use this if you need to go back a bit.
-	#revertFeedDates("2016-03-01 00:00:00")
+	#use this if you need to go back a bit. Note that it won't effect entry
+	#titles if you have to use those for comparison.
+	#revertFeedDates("2016-03-08 00:00:00")
 	
 	try:
 		result = checkFeeds()
@@ -199,19 +198,19 @@ def getFeedEntries(parsedFeed, feedData, entryCap):
 	logging.debug("Checking " + parsedFeed.feed.title)
 	entryResult = ""
 	
-	#if I haven't got a timestamp for the feed, I can just get everything. Easy.
-	#this will need to change a bit once I start using the title as backup.
-	try:
-		#convert the saved former time into a datetime object
-		pastDatetime = stringToDt(feedData["latestTimeStamp"])
-	except (KeyError, ValueError) as error:
-		logging.error("Issue with feed timestamp! %s\n\tCalling getAllEntries()." \
-			% error)
-		#KeyError: "latestTimeStamp" isn't in feedData
-		#ValueError: unable to parse the timestamp string.
-		entryResult = getAllEntries(parsedFeed, entryCap)
+	#If I haven't got a timestamp for the feed, I can just use the entry title.
+	# If I haven't got that either, I can just return all the entries. Easy.
+	if "latestTimeStamp" in feedData:
+		entryResult = getNewEntries(parsedFeed, feedData["latestTimeStamp"], \
+			True, entryCap)
+	elif "latestEntryTitle" in feedData:
+		logging.error("Issue with timestamp!\tusing entry title instead.")
+		entryResult = getNewEntries(parsedFeed, feedData["latestEntryTitle"], \
+			False, entryCap)
 	else:
-		entryResult = getNewEntries(parsedFeed, pastDatetime, entryCap)
+		logging.error("Issue with timestamp and entry title! \
+		\tCalling getAllEntries().")
+		entryResult = getAllEntries(parsedFeed, entryCap)
 
 	#--- FINISHING UP ---------------------------------------------------------
 	#entryResult = ([0] count, [1] entryList)
@@ -229,28 +228,29 @@ def getFeedEntries(parsedFeed, feedData, entryCap):
 #*** END OF getFeedEntries() **************************************************
 
 
-def getNewEntries(parsedFeed, pastDatetime, entryCap):
-	#TODO: I want to use the newest title as an alternative to the datetime.
-	#I could have a general string that compares with both the entry's time & 
-	#title... Then I'd only need to pass one thing.
-	
-	#takes a feed object and a datetime object to compare, returns a tuple with
-	# the total number of new entires and a string with their titles.
+def getNewEntries(parsedFeed, compareString, isTimestamp, entryCap):
+	#takes a feed object and a string to compare. isTimestamp tells the loop if
+	#it should treat compareString as a timestamp or an entry title. Returns a
+	#tuple with the total number of new entires and a string with their titles.
 	# (number of titles) = max(number of entries, entryCap)
 	#--- SETUP ----------------------------------------------------------------
 	#keep track of the number of new entries
 	counter = 0
 	#holds the text output of this function.
 	entryList = ""
-	
+	#temporary boolean value to hold the comparison result.
+	isNew = False
 	#--- MAIN CODE ------------------------------------------------------------
 	#Go through entries until you hit an old one.
 	for entry in parsedFeed.entries:
-		#feedparser parses time as 'time_struct', convert to 'datetime'
-		entryDatetime = timeToDt(entry.updated_parsed)
+		#test the entry based on isTimestamp
+		if isTimestamp:
+			isNew = (timeToStr(entry.updated_parsed) > compareString)
+		else:
+			isNew = (entry.title != compareString)
+		
 		#Check to see if the entry is new.
-		#It is safer to compare datetime-datetime than string-string.
-		if entryDatetime > pastDatetime:
+		if isNew:
 			counter = counter + 1
 			if counter <= entryCap:
 				#add the entry's title to the end of the main list.
@@ -267,7 +267,7 @@ def getAllEntries(parsedFeed, entryCap):
 	#keep track of the total number of entries
 	counter = 0
 	#variable to hold the text output of this function.
-	entryList = ""
+	entryList = "-< All Entries >-\n"
 
 	#--- MAIN CODE ------------------------------------------------------------
 	#Go through all entries.
@@ -345,6 +345,7 @@ def loadFeeds(filePath):
 		#this step takes a little while.
 		parsedFeed = feedparser.parse(feedData["url"])
 		
+		#parsedFeed should ALWAYS have version as an attribute
 		if parsedFeed.version == "": #implies invalid feed URL (not a feed)
 			#the following includes index and the url.
 			logging.warning("Target URL is not a feed! INDEX: %i\n\t%s" % (index,feedData["url"]))
@@ -401,11 +402,11 @@ def trimDatetime_ms(dt):
 	#dt.replace(microsecond = 0)
 #*** END OF trimDatetime_ms() *************************************************
 
-def stringToDt(str):
+def strToDt(str):
 	#easily convert string  with standard format to datetime.
 	#May throw ValueError.
 	return datetime.strptime(str, "%Y-%m-%d %H:%M:%S")
-#*** END OF timeToDt() ********************************************************
+#*** END OF strToDt() *********************************************************
 
 def timeToDt(t):
 	#easily convert time to datetime
@@ -416,6 +417,11 @@ def dtToTime(t):
 	#easily convert datetime to time if you don't care about sub-seconds
 	return time.mktime(dt_obj.timetuple())
 #*** END OF dtToTime() ********************************************************
+
+def timeToStr(t):
+	#easily convert time to string with standard format
+	return time.strftime("%Y-%m-%d %H:%M:%S", t)
+#*** END OF timeToStr() *******************************************************
 
 
 #>>> GETTING DATA <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -493,8 +499,9 @@ def feedDataFaultCheck(feedData):
 	#if not "latestTimeStamp" in feedData: #check for the last timestamp
 	#	feedData["latestTimeStamp"] = "1970-01-01 00:00:00"
 	
-	if not "latestEntryTitle" in feedData: #check for the last entry title
-		feedData["latestEntryTitle"] = ""
+	#same as previous
+	#if not "latestEntryTitle" in feedData: #check for the last entry title
+	#	feedData["latestEntryTitle"] = ""
 
 	if not "title" in feedData: #check for the feed's title
 		feedData["title"] = ""
