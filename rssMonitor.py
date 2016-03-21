@@ -146,6 +146,8 @@ def checkFeeds(filePath="", entryCap=0, urgency=-1):
 				results.append(feedResult[2])#list
 		#--- END OF TRY -------------------------------------------------------
 	
+	
+	#the next two try statements are affected if there are no entries.
 		try:
 			#get the feed's most recent timestamp
 			newTimestamp = str(timeToDt(parsedFeed.entries[0].updated_parsed))
@@ -156,10 +158,18 @@ def checkFeeds(filePath="", entryCap=0, urgency=-1):
 			#if there's no attribute "updated_parsed", delete "latestTimeStamp"
 			#if it exists (if it doesn't, None is returned by pop.)
 			feedList[index].pop("latestTimeStamp",None)
+		except IndexError:
+			#if there are no entries at all, then an IndexError occurs.
+			logging.error("Feed [%i]:[%s] has no entries!" % \
+			(index, feedList[index]["url"]))
 		
-		#also store the title of the newest entry
-		feedList[index]["latestEntryTitle"] = \
-		parsedFeed.entries[0].title
+		try:
+			#also store the title of the newest entry
+			feedList[index]["latestEntryTitle"] = \
+			parsedFeed.entries[0].title
+		except IndexError:
+			#same as above
+			pass
 			
 	#--- END OF LOOP ----------------------------------------------------------
 		
@@ -231,7 +241,7 @@ def getFeedEntries(parsedFeed, feedData, entryCap):
 def getNewEntries(parsedFeed, compareString, isTimestamp, entryCap):
 	#takes a feed object and a string to compare. isTimestamp tells the loop if
 	#it should treat compareString as a timestamp or an entry title. Returns a
-	#tuple with the total number of new entires and a string with their titles.
+	#tuple with the total number of new entries and a string with their titles.
 	# (number of titles) = max(number of entries, entryCap)
 	#--- SETUP ----------------------------------------------------------------
 	#keep track of the number of new entries
